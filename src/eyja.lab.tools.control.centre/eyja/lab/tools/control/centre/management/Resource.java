@@ -20,6 +20,6 @@ public interface Resource {
 	 * 
 	 * @return the ID of this resource
 	 */
-	public Long getID();
+	public ResourceID getID();
 
 }
