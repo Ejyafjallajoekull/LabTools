@@ -3,6 +3,9 @@ package eyja.lab.tools.control.centre.management;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.security.InvalidParameterException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 
 /**
@@ -17,25 +20,62 @@ public class Origin {
 	private File path = null;
 	private OriginDeserialiser deserialiser = null;
 	private OriginSerialiser serialiser = null;
-	private static HashMap<Long, Resource> resourceMap = new HashMap<Long, Resource>();
+	private HashMap<Long, Resource> resourceMap = new HashMap<Long, Resource>();
+	private long lastId = Long.MIN_VALUE;
 
-	public Origin(File path, OriginDeserialiser deserialiser) {
-		this.path = path;
+	/**
+	 * Create a new origin serialised to the specified file with the specified deserailising 
+	 * behaviour.
+	 * 
+	 * @param file - the file this origin is serialised to
+	 * @param deserialiser - the deseraliser loading this origin from the specified file
+	 */
+	public Origin(File file, OriginDeserialiser deserialiser) {
+		this.path = file;
 		this.deserialiser = deserialiser;
 	}
 	
-	public Origin(File path, OriginDeserialiser deserialiser, OriginSerialiser serialiser) {
-		this.path = path;
+	/**
+	 * Create a new origin serialised to the specified file with the specified serialising and 
+	 * deserailising behaviour.
+	 * 
+	 * @param file - the file this origin is serialised to
+	 * @param deserialiser - the deseraliser loading this origin from the specified file
+	 * @param serialiser - the serialiser writing this origin to the specified file
+	 */
+	public Origin(File file, OriginDeserialiser deserialiser, OriginSerialiser serialiser) {
+		this.path = file;
 		this.deserialiser = deserialiser;
 		this.serialiser = serialiser;
 	}
 	
 	/**
 	 * Serialise the origin and all its resources to a file.
+	 * 
+	 * @throws IOException if the specified file could not be written to
 	 */
-	public void write() {
-//		ArrayList<Byte> binaryData = new ArrayList<>
-
+	public void write() throws IOException {
+		File writeLocation = this.getFile();
+		if (writeLocation != null) {
+			byte[] binaryRepresentation = null;
+			if (this.getSerialiser() != null) {
+				binaryRepresentation = this.getSerialiser().serialise(this);
+			} else {
+				// Default implementation to serialise all resources.
+				binaryRepresentation = new byte[0];
+				for (Resource r : this.getResources()) {
+					if (r != null) {
+						byte[] binaryResource = r.serialise();
+						byte[] oldData = binaryRepresentation;
+						binaryRepresentation = Arrays.copyOf(oldData, oldData.length + binaryResource.length);
+						System.arraycopy(binaryResource, 0, binaryRepresentation, oldData.length, binaryResource.length);
+					}
+				}
+			}
+			Files.write(writeLocation.toPath(), binaryRepresentation);
+		} else {
+			throw new IOException("No file for writing has been specified.");
+		}
 	}
 	
 	/**
@@ -86,6 +126,143 @@ public class Origin {
 	 */
 	public OriginSerialiser getSerialiser() {
 		return this.serialiser;
+	}
+	
+	/**
+	 * Get all resources managed by this origin.
+	 * 
+	 * @return an array of all resources contained by this origin
+	 */
+	public Resource[] getResources() {
+		Collection<Resource> resources = this.resourceMap.values();
+		return resources.toArray(new Resource[resources.size()]);
+	}
+	
+	/**
+	 * Request the specified resource to be added to the origin. This request will only be 
+	 * accepted if the resource either has no ID assigned or the origin specifier of the resource's ID 
+	 * points to this origin.
+	 * 
+	 * @param resource - the resource to add to the origin
+	 * @throws NullPointerException if the specified resource is null
+	 * @return true if the resource has been successfully added, false if the resource belongs to 
+	 * a different origin
+	 */
+	public boolean requestAdd(Resource resource) {
+		if (resource != null) {
+			ResourceID id = resource.getID();
+			// The resource is completely new
+			if (id == null) {
+				id = new ResourceID(this, this.requestID());
+				resource.setID(id);
+				this.resourceMap.put(id.getID(), resource);
+				return true;
+			} else if (id.getOrigin() == this) {
+				// TODO: check if ID already existed
+				this.resourceMap.put(id.getID(), resource);
+				if (id.getID() >= this.lastId) {
+					this.lastId = id.getID() + 1l;
+				}
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			throw new NullPointerException("Only valid resources can be added to an origin.");
+		}
+	}
+	
+	/**
+	 * Get the resource with the specified ID from this origin.
+	 * 
+	 * @param id - the ID of the resource to retrieve
+	 * @return the resource with the specified ID or null if no resource with the specified ID 
+	 * belongs to this origin
+	 */
+	public Resource retrieve(Long id) {
+		return this.resourceMap.get(id);
+	}
+	
+	/**
+	 * Get the resource with the specified ID from this origin. Null will be returned if no 
+	 * resource with the specified ID belongs to this origin or the specified ID is null.
+	 * 
+	 * @param id - the ID of the resource to retrieve
+	 * @return the resource with the specified ID or null if no resource with the specified ID 
+	 * belongs to this origin
+	 * @throws InvalidParameterException if the ID belongs to a different origin
+	 */
+	public Resource retrieve(ResourceID id) throws InvalidParameterException {
+		if (id != null) {
+			if (id.getOrigin() == this) {
+				return this.retrieve(id.getID());
+			} else {
+				throw new InvalidParameterException(String.format("The ID %s belongs to origin %s "
+						+ " and cannot be added to origin %s.", id, id.getOrigin(), this));
+			}
+		} else {
+			return null;
+		}
+	}
+	
+	/**
+	 * Request an unique ID from the origin. This ID can be used to reference specific resources.
+	 * 
+	 * @return a unique ID
+	 */
+	public Long requestID() {
+		return Long.valueOf(this.lastId++);
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("Origin: %s", this.getFile());
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((deserialiser == null) ? 0 : deserialiser.hashCode());
+		result = prime * result + (int) (lastId ^ (lastId >>> 32));
+		result = prime * result + ((path == null) ? 0 : path.hashCode());
+		result = prime * result + ((resourceMap == null) ? 0 : resourceMap.hashCode());
+		result = prime * result + ((serialiser == null) ? 0 : serialiser.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof Origin))
+			return false;
+		Origin other = (Origin) obj;
+		if (deserialiser == null) {
+			if (other.deserialiser != null)
+				return false;
+		} else if (!deserialiser.equals(other.deserialiser))
+			return false;
+		if (lastId != other.lastId)
+			return false;
+		if (path == null) {
+			if (other.path != null)
+				return false;
+		} else if (!path.equals(other.path))
+			return false;
+		if (resourceMap == null) {
+			if (other.resourceMap != null)
+				return false;
+		} else if (!resourceMap.equals(other.resourceMap))
+			return false;
+		if (serialiser == null) {
+			if (other.serialiser != null)
+				return false;
+		} else if (!serialiser.equals(other.serialiser))
+			return false;
+		return true;
 	}
 	
 }
