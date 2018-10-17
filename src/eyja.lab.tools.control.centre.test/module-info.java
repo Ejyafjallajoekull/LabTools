@@ -4,7 +4,10 @@
  * @author Planters
  *
  */
-module eyja.lab.tools.cell.counter.test {
+module eyja.lab.tools.control.centre.test {
+	
+	exports eyja.lab.tools.control.centre.test;
+	exports eyja.lab.tools.control.centre.test.management;
 	
 	requires java.base;
 	requires eyja.lab.tools.control.centre;
