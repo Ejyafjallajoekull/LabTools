@@ -1,9 +1,9 @@
 package eyja.lab.tools.control.centre.management;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -56,22 +56,18 @@ public class Origin {
 	public void write() throws IOException {
 		File writeLocation = this.getFile();
 		if (writeLocation != null) {
-			byte[] binaryRepresentation = null;
-			if (this.getSerialiser() != null) {
-				binaryRepresentation = this.getSerialiser().serialise(this);
-			} else {
-				// Default implementation to serialise all resources.
-				binaryRepresentation = new byte[0];
-				for (Resource r : this.getResources()) {
-					if (r != null) {
-						byte[] binaryResource = r.serialise();
-						byte[] oldData = binaryRepresentation;
-						binaryRepresentation = Arrays.copyOf(oldData, oldData.length + binaryResource.length);
-						System.arraycopy(binaryResource, 0, binaryRepresentation, oldData.length, binaryResource.length);
+			try (FileOutputStream originData = new FileOutputStream(writeLocation)) {
+				if (this.getSerialiser() != null) {
+					this.getSerialiser().serialise(originData, this);
+				} else {
+					// Default implementation to serialise all resources.
+					for (Resource r : this.getResources()) {
+						if (r != null) {
+							originData.write(r.serialise());
+						}
 					}
 				}
 			}
-			Files.write(writeLocation.toPath(), binaryRepresentation);
 		} else {
 			throw new IOException("No file for writing has been specified.");
 		}
@@ -87,10 +83,11 @@ public class Origin {
 		File readLocation = this.getFile();
 		// only allow files that exist
 		if (readLocation != null && readLocation.isFile()) {
-			byte[] readData = Files.readAllBytes(readLocation.toPath());
 			OriginDeserialiser deserial = this.getDeserialiser();
 			if (deserial != null) {
-				deserial.deserialise(readData, this);
+				try (FileInputStream readData = new FileInputStream(readLocation)) {
+					deserial.deserialise(readData, this);
+				}
 			} else {
 				throw new NullPointerException("The origin needs a deserialiser in order to be read "
 						+ "from a file.");

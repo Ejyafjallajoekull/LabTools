@@ -1,5 +1,7 @@
 package eyja.lab.tools.control.centre.management;
 
+import java.io.OutputStream;
+
 /**
  * The OriginSerialiser interface represents the functionality to convert an Origin to binary 
  * data. This is mainly used for serialising resources belonging to the origin.
@@ -12,10 +14,11 @@ public interface OriginSerialiser {
 	/**
 	 * Serialise an origin into binary data.
 	 *
+	 * @param originData - the stream to serialise the data to
 	 * @param origin - the origin to serialise
 	 *
 	 * @return the binary representation of the origin
 	 */
-	public byte[] serialise(Origin origin);
+	public void serialise(OutputStream originData, Origin origin);
 
 }
