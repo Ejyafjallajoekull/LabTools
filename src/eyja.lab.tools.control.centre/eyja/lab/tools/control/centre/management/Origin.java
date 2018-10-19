@@ -3,7 +3,6 @@ package eyja.lab.tools.control.centre.management;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.security.InvalidParameterException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -93,7 +92,7 @@ public class Origin {
 			if (deserial != null) {
 				deserial.deserialise(readData, this);
 			} else {
-				throw new NullPointerException("The Origin needs a deserialiser in order to be read "
+				throw new NullPointerException("The origin needs a deserialiser in order to be read "
 						+ "from a file.");
 			}
 		} else {
@@ -141,14 +140,14 @@ public class Origin {
 	/**
 	 * Request the specified resource to be added to the origin. This request will only be 
 	 * accepted if the resource either has no ID assigned or the origin specifier of the resource's ID 
-	 * points to this origin.
+	 * points to this origin. The ID will be returned after successful addition. In case of failure 
+	 * null is returned.
 	 * 
 	 * @param resource - the resource to add to the origin
-	 * @throws NullPointerException if the specified resource is null
-	 * @return true if the resource has been successfully added, false if the resource belongs to 
-	 * a different origin
+	 * @return the resource's ID after successful addition, null if the resource belongs to 
+	 * a different origin or is null
 	 */
-	public boolean requestAdd(Resource resource) {
+	public ResourceID requestAdd(Resource resource) {
 		if (resource != null) {
 			ResourceID id = resource.getID();
 			// The resource is completely new
@@ -156,20 +155,17 @@ public class Origin {
 				id = new ResourceID(this, this.requestID());
 				resource.setID(id);
 				this.resourceMap.put(id.getID(), resource);
-				return true;
+				return id;
 			} else if (id.getOrigin() == this) {
 				// TODO: check if ID already existed
 				this.resourceMap.put(id.getID(), resource);
 				if (id.getID() >= this.lastId) {
 					this.lastId = id.getID() + 1l;
 				}
-				return true;
-			} else {
-				return false;
+				return id;
 			}
-		} else {
-			throw new NullPointerException("Only valid resources can be added to an origin.");
 		}
+		return null;
 	}
 	
 	/**
@@ -179,7 +175,7 @@ public class Origin {
 	 * @return the resource with the specified ID or null if no resource with the specified ID 
 	 * belongs to this origin
 	 */
-	public Resource retrieve(Long id) {
+	public Resource retrieve(long id) {
 		return this.resourceMap.get(id);
 	}
 	
@@ -190,14 +186,14 @@ public class Origin {
 	 * @param id - the ID of the resource to retrieve
 	 * @return the resource with the specified ID or null if no resource with the specified ID 
 	 * belongs to this origin
-	 * @throws InvalidParameterException if the ID belongs to a different origin
+	 * @throws IllegalArgumentException if the ID belongs to a different origin
 	 */
-	public Resource retrieve(ResourceID id) throws InvalidParameterException {
+	public Resource retrieve(ResourceID id) throws IllegalArgumentException {
 		if (id != null) {
 			if (id.getOrigin() == this) {
 				return this.retrieve(id.getID());
 			} else {
-				throw new InvalidParameterException(String.format("The ID %s belongs to origin %s "
+				throw new IllegalArgumentException(String.format("The ID %s belongs to origin %s "
 						+ " and cannot be added to origin %s.", id, id.getOrigin(), this));
 			}
 		} else {

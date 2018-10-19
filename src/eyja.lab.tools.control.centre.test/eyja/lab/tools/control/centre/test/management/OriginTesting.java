@@ -6,6 +6,7 @@ import java.util.Arrays;
 import eyja.lab.tools.control.centre.management.Origin;
 import eyja.lab.tools.control.centre.management.OriginDeserialiser;
 import eyja.lab.tools.control.centre.management.OriginSerialiser;
+import eyja.lab.tools.control.centre.management.Resource;
 import eyja.lab.tools.control.centre.management.ResourceID;
 import eyja.lab.tools.control.centre.test.TestRunnerWrapper;
 import koro.sensei.tester.TestFailureException;
@@ -18,6 +19,16 @@ import koro.sensei.tester.TestSubject;
  *
  */
 public class OriginTesting implements TestSubject {
+	
+	private static final String TEST_FOLDER = "LabToolsTestRunner/Origin/";
+	private static final OriginDeserialiser TEST_DESERIALISER = new OriginDeserialiser() {
+		
+		@Override
+		public void deserialise(byte[] originData, Origin originToBuild) {
+//			originData.
+			
+		}
+	};
 
 	@Override
 	public void runAllTests() throws TestFailureException {
@@ -25,9 +36,9 @@ public class OriginTesting implements TestSubject {
 		OriginTesting.testGetting();
 		OriginTesting.testGetResources();
 		OriginTesting.testAddingResources();
-//		OriginTesting.
-//		OriginTesting.
-//		OriginTesting.
+		OriginTesting.testRetrieve();
+		OriginTesting.testRequestID();
+//		OriginTesting.testIO();
 	}
 	
 	/**
@@ -166,27 +177,146 @@ public class OriginTesting implements TestSubject {
 			for (int j = 0; j < randomNumResource; j++) {
 				ResourceID currentID = new ResourceID(firstOrigin, j);
 				randomResources[j] = new TestResource(currentID);
-				boolean success = firstOrigin.requestAdd(randomResources[j]);
+				ResourceID assignedID = firstOrigin.requestAdd(randomResources[j]);
+				// retrieve by explicit ID
 				TestSubject.assertTestCondition(randomResources[j].equals(firstOrigin.retrieve(currentID)), 
 						String.format("The origin %s should yield resource %s when supplying key %s, "
 								+ "but yields %s.", 
 								firstOrigin, randomResources[j], currentID, 
 								firstOrigin.retrieve(currentID)));
-				TestSubject.assertTestCondition(success, 
-						String.format("The resource %s should be added successfully to origin %s.", 
-								randomResources[j], firstOrigin));
+				// retrieve by implicit ID
+				TestSubject.assertTestCondition(randomResources[j].equals(firstOrigin.retrieve(currentID.getID())), 
+						String.format("The origin %s should yield resource %s when supplying key %s, "
+								+ "but yields %s.", 
+								firstOrigin, randomResources[j], currentID, 
+								firstOrigin.retrieve(currentID)));
+				TestSubject.assertTestCondition(currentID.equals(assignedID), 
+						String.format("The resource %s should be added successfully to origin %s with ID "
+								+ "%s, but has been added with ID %s.", 
+								randomResources[j], firstOrigin, currentID, assignedID));
 			}
-//			boolean nullSuccess = firstOrigin.requestAdd(null);
-//			TestSubject.assertTestCondition(!nullSuccess, 
-//					String.format("The resource %s should not be added successfully to origin %s.", 
-//							null, firstOrigin));
-//			boolean nullSuccess = firstOrigin.requestAdd(null);
-//			TestSubject.assertTestCondition(!nullSuccess, 
-//					String.format("The resource %s should not be added successfully to origin %s.", 
-//							null, firstOrigin));
+			// test null
+			ResourceID nullID = firstOrigin.requestAdd(null);
+			TestSubject.assertTestCondition(nullID == null, 
+					String.format("The resource %s should not be added successfully to origin %s. The "
+							+ "returned ID should be "
+							+ "%s, but is %s.", 
+							null, firstOrigin, null, nullID));
+			// test wrong ID
+			Resource wrongResource = new TestResource(new ResourceID(new Origin(new File(
+					firstOrigin.getFile().toString() + TestRunnerWrapper.RANDOM.nextInt(500)),
+					firstOrigin.getDeserialiser()), TestRunnerWrapper.RANDOM.nextLong()));
+			ResourceID wrongID = firstOrigin.requestAdd(wrongResource);
+			TestSubject.assertTestCondition(wrongID == null, 
+					String.format("The resource %s should not be added successfully to origin %s. The "
+							+ "returned ID should be "
+							+ "%s, but is %s.", 
+							wrongResource, firstOrigin, null, wrongID));
 		}
 	}
+	
+	/**
+	 * Test getting new IDs from the origin.
+	 * 
+	 * @throws TestFailureException the test did fail
+	 */
+	private static void testRetrieve() throws TestFailureException {
+		for (int i = 0; i < 10000; i++) {
+			// test adding resources and increment id
+			Origin testOrigin = OriginTesting.createRandomOrigin();
+			ResourceID randomID = new ResourceID(testOrigin, TestRunnerWrapper.RANDOM.nextLong());
+			Resource testResource = new TestResource(randomID);
+			testOrigin.requestAdd(testResource);
+			Resource queryID = testOrigin.retrieve(randomID);
+			Resource queryLong = testOrigin.retrieve(randomID.getID());
+			TestSubject.assertTestCondition(testResource.equals(queryID), 
+					String.format("For origin %s the resource %s retrieved with explicite ID %s "
+							+ "should be %s.", 	testOrigin, queryID, randomID, testResource));
+			TestSubject.assertTestCondition(queryID.equals(queryLong), 
+					String.format("For origin %s the resource %s retrieved with explicite ID %s and "
+							+ "resource %s retrived with implicite ID %s should be equal.", 
+							testOrigin, queryID, randomID, queryLong, randomID.getID()));
+			// test null
+			Resource queryNull = testOrigin.retrieve(null);
+			TestSubject.assertTestCondition(queryNull == null, 
+					String.format("For origin %s the resource %s retrieved with explicite ID %s "
+							+ "should be %s.", 	testOrigin, queryNull, null, null));
+			// test ID from different origin
+			Origin wrongOrigin = OriginTesting.createRandomOrigin();
+			ResourceID wrongID = new ResourceID(wrongOrigin, TestRunnerWrapper.RANDOM.nextLong());
+			try {
+				testOrigin.retrieve(wrongID);
+				throw new TestFailureException(String.format("Requesting the explicit ID %s of origin %s from origin "
+						+ "%s should fail.", wrongID, wrongOrigin, testOrigin));
+			} catch (IllegalArgumentException e) {
+				// Do nothing as this is expected behaviour.
+			}
 
+		}
+	}
+	
+	/**
+	 * Test getting new IDs from the origin.
+	 * 
+	 * @throws TestFailureException the test did fail
+	 */
+	private static void testRequestID() throws TestFailureException {
+		for (int i = 0; i < 10000; i++) {
+			// test numeric increment
+			Origin numericOrigin = OriginTesting.createRandomOrigin();
+			long startingID = numericOrigin.requestID();
+			long endID = startingID;
+			// add some random resources
+			int randomNumResource = TestRunnerWrapper.RANDOM.nextInt(300);
+			for (int j = 0; j < randomNumResource; j++) {
+				endID = (numericOrigin.requestAdd(new TestResource())).getID();
+			}
+			TestSubject.assertTestCondition(endID == startingID + randomNumResource, 
+					String.format("For origin %s (ID: %s)the last ID issued should be %s instead of %s "
+							+ "after adding %s resources.", 
+							numericOrigin, startingID, startingID + randomNumResource, 
+							endID, randomNumResource));
+			// test adding resources and increment id
+			Origin loadOrigin = OriginTesting.createRandomOrigin();
+			ResourceID startingResource = new ResourceID(loadOrigin, TestRunnerWrapper.RANDOM.nextLong());
+			loadOrigin.requestAdd(new TestResource(startingResource));
+			long endIDLoad = startingResource.getID();
+			// add some random resources
+			int randomNumResourceLoad = TestRunnerWrapper.RANDOM.nextInt(300);
+			for (int j = 0; j < randomNumResourceLoad; j++) {
+				endIDLoad = (loadOrigin.requestAdd(new TestResource())).getID();
+			}
+			TestSubject.assertTestCondition(endIDLoad == startingResource.getID() + randomNumResourceLoad, 
+					String.format("For origin %s (ID: %s)the last ID issued should be %s instead of %s "
+							+ "after adding %s resources.", 
+							loadOrigin, startingResource, startingResource.getID() + randomNumResourceLoad, 
+							endIDLoad, randomNumResourceLoad));
+
+		}
+	}
+	
+	/**
+	 * Test reading and writing the origin.
+	 * 
+	 * @throws TestFailureException the test did fail
+	 */
+//	private static void testIO() throws TestFailureException {
+//		for (int i = 0; i < 10000; i++) {
+//			// test random resource
+//			Origin testOrigin = new Origin();
+//			// add some random resources
+//			int randomNumResource = TestRunnerWrapper.RANDOM.nextInt(300);
+//			for (int j = 0; j < randomNumResource; j++) {
+//				testOrigin.requestAdd(new TestResource());
+//			}
+//			try {
+//				testOrigin.write();
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//				throw new TestFailureException(e);
+//			}
+//		}
+//	}
 	
 	/**
 	 * Create a random origin.
@@ -241,7 +371,7 @@ public class OriginTesting implements TestSubject {
 	 * @return a random file
 	 */
 	private static File createRandomFile() {
-		return new File("LabToolsTestRunner/" + TestRunnerWrapper.RANDOM.nextInt());
+		return new File(OriginTesting.TEST_FOLDER + TestRunnerWrapper.RANDOM.nextInt());
 	}
 
 }
