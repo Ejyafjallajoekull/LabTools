@@ -10,7 +10,7 @@ package eyja.lab.tools.control.centre.management;
 public class ResourceID {
 
 	private Origin origin = null;
-	private Long id = null;
+	private long id = 0;
 	
 	/**
 	 * Create a new resource ID compromised out of an origin and a origin unique ID.
@@ -37,7 +37,7 @@ public class ResourceID {
 	 * 
 	 * @return the resource's ID
 	 */
-	public Long getID() {
+	public long getID() {
 		return this.id;
 	}
 	
@@ -50,7 +50,7 @@ public class ResourceID {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + (int) (id ^ (id >>> 32));
 		result = prime * result + ((origin == null) ? 0 : origin.hashCode());
 		return result;
 	}
@@ -61,20 +61,16 @@ public class ResourceID {
 			return true;
 		if (obj == null)
 			return false;
-		if (!(obj instanceof ResourceID))
+		if (getClass() != obj.getClass())
 			return false;
 		ResourceID other = (ResourceID) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
+		if (id != other.id)
 			return false;
-		if (origin == null) {
-			if (other.origin != null)
-				return false;
-		} else if (!origin.equals(other.origin))
+		if (origin != other.origin) {
 			return false;
+		}
 		return true;
 	}
+
 	
 }
