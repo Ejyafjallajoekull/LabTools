@@ -36,6 +36,20 @@ public class TestResource extends Resource {
 		return ByteBuffer.allocate(8).putLong(this.getID().getID()).array();
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		// ignore origin
+		if (obj != null && obj instanceof TestResource) {
+			TestResource comp = (TestResource) obj;
+			if (this.getID() == null && comp.getID() == null) {
+				return true;
+			} else if (this.getID() != null && comp.getID() != null) {
+				return this.getID().getID() == comp.getID().getID();
+			}
+		}
+		return false;
+	}
+	
 	/**
 	 * Create a random test resource.
 	 * 

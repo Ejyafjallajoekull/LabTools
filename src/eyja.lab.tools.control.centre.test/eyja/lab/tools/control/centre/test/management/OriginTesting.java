@@ -1,6 +1,11 @@
 package eyja.lab.tools.control.centre.test.management;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Arrays;
 
 import eyja.lab.tools.control.centre.management.Origin;
@@ -20,14 +25,37 @@ import koro.sensei.tester.TestSubject;
  */
 public class OriginTesting implements TestSubject {
 	
-	private static final String TEST_FOLDER = "LabToolsTestRunner/Origin/";
+	private static final String TEST_FOLDER = "LabToolsTestRunnerOrigin/";
 	private static final OriginDeserialiser TEST_DESERIALISER = new OriginDeserialiser() {
+
+		@Override
+		public void deserialise(InputStream originData, Origin originToBuild) {
+			try (DataInputStream dis = new DataInputStream(originData)) {
+				while (dis.available() > 0) {
+					originToBuild.requestAdd(new TestResource(new ResourceID(originToBuild, dis.readLong())));
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+	};
+	private static final OriginSerialiser TEST_SERIALISER = new OriginSerialiser() {
 		
 		@Override
-		public void deserialise(byte[] originData, Origin originToBuild) {
-//			originData.
-			
+		public void serialise(OutputStream originData, Origin origin) {
+			try (DataOutputStream dos = new DataOutputStream(originData)) {
+				for (Resource r : origin.getResources()) {
+					// Serialise all resources with even IDs.
+					if (r != null && r.getID().getID() % 2 == 0) {
+						dos.write(r.serialise());
+					}
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
+		
 	};
 
 	@Override
@@ -38,7 +66,7 @@ public class OriginTesting implements TestSubject {
 		OriginTesting.testAddingResources();
 		OriginTesting.testRetrieve();
 		OriginTesting.testRequestID();
-//		OriginTesting.testIO();
+		OriginTesting.testIO();
 	}
 	
 	/**
@@ -300,23 +328,35 @@ public class OriginTesting implements TestSubject {
 	 * 
 	 * @throws TestFailureException the test did fail
 	 */
-//	private static void testIO() throws TestFailureException {
-//		for (int i = 0; i < 10000; i++) {
-//			// test random resource
-//			Origin testOrigin = new Origin();
-//			// add some random resources
-//			int randomNumResource = TestRunnerWrapper.RANDOM.nextInt(300);
-//			for (int j = 0; j < randomNumResource; j++) {
-//				testOrigin.requestAdd(new TestResource());
-//			}
-//			try {
-//				testOrigin.write();
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//				throw new TestFailureException(e);
-//			}
-//		}
-//	}
+	private static void testIO() throws TestFailureException {
+		for (int i = 0; i < 10000; i++) {
+			// test default serialiser
+			Origin defaultOrigin = new Origin(OriginTesting.createRandomFile(), OriginTesting.TEST_DESERIALISER);
+			// add some random resources
+			int randomNumResource = TestRunnerWrapper.RANDOM.nextInt(300);
+			for (int j = 0; j < randomNumResource; j++) {
+				defaultOrigin.requestAdd(new TestResource());
+			}
+			try {
+				defaultOrigin.write();
+				Origin readOrigin = new Origin(defaultOrigin.getFile(), defaultOrigin.getDeserialiser());
+				readOrigin.read();
+				TestSubject.assertTestCondition(readOrigin.equals(defaultOrigin), 
+						String.format("Origin %s should equal the origin %s", readOrigin, defaultOrigin));
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new TestFailureException(e);
+			}
+			// test custom serialiser
+			
+		}
+		// delete all created files and folders
+		File testFolder = new File(OriginTesting.TEST_FOLDER);
+		for (File f : testFolder.listFiles()) {
+			f.delete();
+		}
+		testFolder.delete();
+	}
 	
 	/**
 	 * Create a random origin.
@@ -342,7 +382,7 @@ public class OriginTesting implements TestSubject {
 		return new OriginDeserialiser() {
 			
 			@Override
-			public void deserialise(byte[] originData, Origin originToBuild) {
+			public void deserialise(InputStream originData, Origin originToBuild) {
 				// Do nothing here.
 			}
 			
@@ -356,10 +396,10 @@ public class OriginTesting implements TestSubject {
 	 */
 	private static OriginSerialiser createRandomSerialiser() {
 		return new OriginSerialiser() {
-			
+
 			@Override
-			public byte[] serialise(Origin origin) {
-				return null;
+			public void serialise(OutputStream originData, Origin origin) {
+				// Do nothing here.
 			}
 			
 		};
