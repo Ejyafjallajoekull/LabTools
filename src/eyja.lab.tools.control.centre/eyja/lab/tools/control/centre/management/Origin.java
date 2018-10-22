@@ -56,7 +56,12 @@ public class Origin {
 	public void write() throws IOException {
 		File writeLocation = this.getFile();
 		if (writeLocation != null) {
-			try (FileOutputStream originData = new FileOutputStream(writeLocation)) {
+			// create the folder structure if needed
+			File parentFolder = writeLocation.getParentFile();
+			if (parentFolder != null && !parentFolder.exists()) {
+				parentFolder.mkdirs();
+			}
+			try (FileOutputStream originData = new FileOutputStream(writeLocation, false)) {
 				if (this.getSerialiser() != null) {
 					this.getSerialiser().serialise(originData, this);
 				} else {

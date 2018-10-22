@@ -16,8 +16,6 @@ public interface OriginSerialiser {
 	 *
 	 * @param originData - the stream to serialise the data to
 	 * @param origin - the origin to serialise
-	 *
-	 * @return the binary representation of the origin
 	 */
 	public void serialise(OutputStream originData, Origin origin);
 
