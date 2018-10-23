@@ -501,7 +501,7 @@ public class OriginTesting implements TestSubject {
 	 * 
 	 * @return an origin
 	 */
-	private static Origin createRandomOrigin() {
+	public static Origin createRandomOrigin() {
 		if (TestRunnerWrapper.RANDOM.nextDouble() < 0.4) {
 			return new Origin(OriginTesting.createRandomFile(), 
 					OriginTesting.createRandomDeserialiser(), null);

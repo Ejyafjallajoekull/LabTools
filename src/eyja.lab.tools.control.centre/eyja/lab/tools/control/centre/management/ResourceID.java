@@ -43,7 +43,7 @@ public class ResourceID {
 	
 	@Override
 	public String toString() {
-		return String.format("%s:%s", this.getOrigin(), this.getID());
+		return String.format("[%s:%s]", this.getOrigin(), this.getID());
 	}
 
 	@Override
