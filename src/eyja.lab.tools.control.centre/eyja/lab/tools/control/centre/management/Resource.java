@@ -34,6 +34,20 @@ public abstract class Resource {
 	public void setID(ResourceID id) {
 		this.id = id;
 	}
+	
+	/**
+	 * Create a specific reference to this resource, which can be used to identify this resource 
+	 * even after serialisation and deserialisation. A reference can only be created if the resource is 
+	 * part of a valid origin.
+	 * 
+	 * @return a reference to this resource
+	 * 
+	 * @throws NullPointerException if the resource has not been assigned to any origin yet or the 
+	 * origin is invalid
+	 */
+	public ResourceReference getReference() {
+		return new ResourceReference(this.getID());
+	}
 
 	@Override
 	public String toString() {

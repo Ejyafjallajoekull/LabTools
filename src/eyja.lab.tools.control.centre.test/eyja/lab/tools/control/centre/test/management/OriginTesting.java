@@ -501,6 +501,7 @@ public class OriginTesting implements TestSubject {
 	 * 
 	 * @return an origin
 	 */
+	@SuppressWarnings("exports")
 	public static Origin createRandomOrigin() {
 		if (TestRunnerWrapper.RANDOM.nextDouble() < 0.4) {
 			return new Origin(OriginTesting.createRandomFile(), 
