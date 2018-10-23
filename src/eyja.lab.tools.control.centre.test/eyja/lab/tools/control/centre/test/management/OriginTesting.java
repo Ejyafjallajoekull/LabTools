@@ -65,6 +65,7 @@ public class OriginTesting implements TestSubject {
 		OriginTesting.testGetResources();
 		OriginTesting.testAddingResources();
 		OriginTesting.testRetrieve();
+		OriginTesting.testRemove();
 		OriginTesting.testRequestID();
 		OriginTesting.testIO();
 	}
@@ -244,7 +245,7 @@ public class OriginTesting implements TestSubject {
 	}
 	
 	/**
-	 * Test getting new IDs from the origin.
+	 * Test getting resources from the origin.
 	 * 
 	 * @throws TestFailureException the test did fail
 	 */
@@ -278,6 +279,76 @@ public class OriginTesting implements TestSubject {
 						+ "%s should fail.", wrongID, wrongOrigin, testOrigin));
 			} catch (IllegalArgumentException e) {
 				// Do nothing as this is expected behaviour.
+			}
+
+		}
+	}
+	
+	/**
+	 * Test removing resources from the origin.
+	 * 
+	 * @throws TestFailureException the test did fail
+	 */
+	private static void testRemove() throws TestFailureException {
+		for (int i = 0; i < 10000; i++) {
+			{ // test implicit removal
+				Origin removeOrigin = OriginTesting.createRandomOrigin();
+				// add some random resources
+				int randomNumResource = TestRunnerWrapper.RANDOM.nextInt(300);
+				for (int j = 0; j < randomNumResource; j++) {
+					removeOrigin.requestAdd(new TestResource());
+				}
+				Resource[] allResources = removeOrigin.getResources(); 
+				Resource removeResource = new TestResource();
+				ResourceID removeID = removeOrigin.requestAdd(removeResource);
+				Resource removedResource = removeOrigin.remove(removeID.getID());
+				TestSubject.assertTestCondition(removedResource == removeResource, 
+						String.format("The resource %s removed from origin %s should be %s.", 
+								removedResource, removeOrigin, removeResource));
+				TestSubject.assertTestCondition(Arrays.equals(allResources, removeOrigin.getResources()), 
+						String.format("The resources %s contained by origin %s should be %s "
+								+ "after removal of %s.", Arrays.toString(removeOrigin.getResources()), 
+								removeOrigin, Arrays.toString(allResources), removeID));
+				// test returning null if not available
+				Resource nonExistentResource = removeOrigin.remove(removeID.getID());
+				TestSubject.assertTestCondition(nonExistentResource == null, 
+						String.format("The resource %s removed from origin %s should be %s.", 
+								nonExistentResource, removeOrigin, null));
+			} { // test explicit removal
+				Origin removeOrigin = OriginTesting.createRandomOrigin();
+				// add some random resources
+				int randomNumResource = TestRunnerWrapper.RANDOM.nextInt(300);
+				for (int j = 0; j < randomNumResource; j++) {
+					removeOrigin.requestAdd(new TestResource());
+				}
+				Resource[] allResources = removeOrigin.getResources(); 
+				Resource removeResource = new TestResource();
+				ResourceID removeID = removeOrigin.requestAdd(removeResource);
+				Resource removedResource = removeOrigin.remove(removeID);
+				TestSubject.assertTestCondition(removedResource == removeResource, 
+						String.format("The resource %s removed from origin %s should be %s.", 
+								removedResource, removeOrigin, removeResource));
+				TestSubject.assertTestCondition(Arrays.equals(allResources, removeOrigin.getResources()), 
+						String.format("The resources %s contained by origin %s should be %s "
+								+ "after removal of %s.", Arrays.toString(removeOrigin.getResources()), 
+								removeOrigin, Arrays.toString(allResources), removeID));
+				// test returning null if not available
+				Resource nonExistentResource = removeOrigin.remove(removeID);
+				TestSubject.assertTestCondition(nonExistentResource == null, 
+						String.format("The resource %s removed from origin %s should be %s.", 
+								nonExistentResource, removeOrigin, null));
+			} { // test explicit removal with wrong origin
+				Origin removeOrigin = OriginTesting.createRandomOrigin();
+				Origin differentOrigin = OriginTesting.createRandomOrigin();
+				ResourceID removeID = new ResourceID(differentOrigin, TestRunnerWrapper.RANDOM.nextLong());
+				try {
+					Resource removedResource = removeOrigin.remove(removeID);
+					throw new TestFailureException(String.format(
+							"Removing the ID %s should fail as it is from a different origin, but "
+							+ "removed resource %s instead.", removeID, removedResource));
+				} catch (IllegalArgumentException e) {
+					// Do nothing as this is expected behaviour.
+				}
 			}
 
 		}
@@ -330,25 +401,92 @@ public class OriginTesting implements TestSubject {
 	 */
 	private static void testIO() throws TestFailureException {
 		for (int i = 0; i < 10000; i++) {
-			// test default serialiser
-			Origin defaultOrigin = new Origin(OriginTesting.createRandomFile(), OriginTesting.TEST_DESERIALISER);
-			// add some random resources
-			int randomNumResource = TestRunnerWrapper.RANDOM.nextInt(300);
-			for (int j = 0; j < randomNumResource; j++) {
-				defaultOrigin.requestAdd(new TestResource());
+			{ // test default serialiser
+				Origin defaultOrigin = new Origin(OriginTesting.createRandomFile(), OriginTesting.TEST_DESERIALISER);
+				// add some random resources
+				int randomNumResource = TestRunnerWrapper.RANDOM.nextInt(300);
+				for (int j = 0; j < randomNumResource; j++) {
+					defaultOrigin.requestAdd(new TestResource());
+				}
+				try {
+					defaultOrigin.write();
+					Origin readOrigin = new Origin(defaultOrigin.getFile(), defaultOrigin.getDeserialiser());
+					readOrigin.read();
+					TestSubject.assertTestCondition(readOrigin.equals(defaultOrigin), 
+							String.format("Origin %s should equal the origin %s", readOrigin, defaultOrigin));
+				} catch (IOException e) {
+					e.printStackTrace();
+					throw new TestFailureException(e);
+				}
+			} { // test custom serialiser
+				Origin customOrigin = new Origin(OriginTesting.createRandomFile(), OriginTesting.TEST_DESERIALISER, 
+						OriginTesting.TEST_SERIALISER);
+				// add some random resources
+				int randomNumResource = TestRunnerWrapper.RANDOM.nextInt(300);
+				for (int j = 0; j < randomNumResource; j++) {
+					customOrigin.requestAdd(new TestResource());
+				}
+				try {
+					customOrigin.write();
+					// only accept resources with even IDs
+					Origin evenOrigin = new Origin(customOrigin.getFile(), customOrigin.getDeserialiser(), 
+							customOrigin.getSerialiser());
+					for (Resource r : customOrigin.getResources()) {
+						if (r.getID().getID() % 2 == 0) {
+							evenOrigin.requestAdd(new TestResource(new ResourceID(evenOrigin, r.getID().getID())));
+						}
+					}
+					Origin readOrigin = new Origin(customOrigin.getFile(), customOrigin.getDeserialiser(), 
+							customOrigin.getSerialiser());
+					readOrigin.read();
+					TestSubject.assertTestCondition(readOrigin.equals(evenOrigin),
+							String.format("Origin %s should equal the origin %s", readOrigin, evenOrigin));
+				} catch (IOException e) {
+					e.printStackTrace();
+					throw new TestFailureException(e);
+				}
+			} { // test null deserialiser
+				Origin nullDOrigin = new Origin(OriginTesting.createRandomFile(), null);
+				// add some random resources
+				int randomNumResource = TestRunnerWrapper.RANDOM.nextInt(300);
+				for (int j = 0; j < randomNumResource; j++) {
+					nullDOrigin.requestAdd(new TestResource());
+				}
+				try {
+					nullDOrigin.write(); // writing should still work even without deserialiser
+					try {
+						nullDOrigin.read();
+						throw new TestFailureException(String.format(
+								"Reading the origin %s without a deserialiser should fail.", nullDOrigin));
+					} catch (NullPointerException npe) {
+						// Do nothing as this is expected behaviour.
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+					throw new TestFailureException(e);
+				}
+			} { // test null file
+				Origin nullFOrigin = new Origin(null, OriginTesting.TEST_DESERIALISER);
+				// add some random resources
+				int randomNumResource = TestRunnerWrapper.RANDOM.nextInt(300);
+				for (int j = 0; j < randomNumResource; j++) {
+					nullFOrigin.requestAdd(new TestResource());
+				}
+				try {
+					nullFOrigin.write();
+					throw new TestFailureException(String.format(
+							"Writing the origin %s without a specified file should fail.", nullFOrigin));
+				} catch (IOException e) {
+					// Do nothing as this is expected behaviour.
+				}
+				try {
+					nullFOrigin.read();
+					throw new TestFailureException(String.format(
+							"Reading the origin %s without a specified file should fail.", nullFOrigin));
+				} catch (IOException e) {
+					// Do nothing as this is expected behaviour.
+				}
 			}
-			try {
-				defaultOrigin.write();
-				Origin readOrigin = new Origin(defaultOrigin.getFile(), defaultOrigin.getDeserialiser());
-				readOrigin.read();
-				TestSubject.assertTestCondition(readOrigin.equals(defaultOrigin), 
-						String.format("Origin %s should equal the origin %s", readOrigin, defaultOrigin));
-			} catch (IOException e) {
-				e.printStackTrace();
-				throw new TestFailureException(e);
-			}
-			// test custom serialiser
-			
 		}
 		// delete all created files and folders
 		File testFolder = new File(OriginTesting.TEST_FOLDER);

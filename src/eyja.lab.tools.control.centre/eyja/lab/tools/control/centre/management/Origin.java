@@ -204,6 +204,39 @@ public class Origin {
 	}
 	
 	/**
+	 * Remove the resource with the specified implicit ID from this origin.
+	 * 
+	 * @param id - the implicit ID of the resource to remove
+	 * @return the resource removed or null if no resource with the specified ID 
+	 * belonged to this origin
+	 */
+	public Resource remove(long id) {
+		return this.resourceMap.remove(id);
+	}
+	
+	/**
+	 * Remove the resource with the specified explicit ID from this origin.
+	 * 
+	 * @param id - the explicit ID of the resource to remove
+	 * @return the resource removed or null if no resource with the specified ID 
+	 * belonged to this origin
+	 * 
+	 * @throws IllegalArgumentException if the ID belongs to a different origin
+	 */
+	public Resource remove(ResourceID id) {
+		if (id != null) {
+			if (id.getOrigin() == this) {
+				return this.resourceMap.remove(id.getID());
+			} else {
+				throw new IllegalArgumentException(String.format("The ID %s belongs to origin %s "
+						+ " and cannot be removed from origin %s.", id, id.getOrigin(), this));
+			}
+		} else {
+			return null;
+		}
+	}
+	
+	/**
 	 * Request an unique ID from the origin. This ID can be used to reference specific resources.
 	 * 
 	 * @return a unique ID
