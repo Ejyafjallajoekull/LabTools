@@ -12,6 +12,9 @@ import java.time.LocalDateTime;
  */
 public final class BinaryConverter {
 	
+	/**
+	 * The length of the binary representation of a LocalDateTime object.
+	 */
 	public static final int LOCAL_DATE_TIME_BYTES = Integer.BYTES * 7;
 	
 	/**
