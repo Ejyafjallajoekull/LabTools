@@ -82,5 +82,27 @@ public class OriginHandler {
 		}
 	}
 	
+	@Override
+	public String toString() {
+		return this.originMap.keySet().toString();
+	}
+
+	@Override
+	public int hashCode() {
+		return 31 + originMap.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj != null && obj instanceof OriginHandler) {
+			final OriginHandler comp = (OriginHandler) obj;
+			if (comp.originMap == null && this.originMap == null) {
+				return true;
+			} else if (this.originMap != null) {
+				return this.originMap.equals(comp.originMap);
+			}
+		}
+		return false;
+	}
 	
 }
