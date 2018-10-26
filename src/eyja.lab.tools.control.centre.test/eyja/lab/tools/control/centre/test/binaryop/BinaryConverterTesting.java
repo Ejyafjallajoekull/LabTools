@@ -1,5 +1,8 @@
 package eyja.lab.tools.control.centre.test.binaryop;
 
+import java.time.DateTimeException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 
 import eyja.lab.tools.control.centre.binaryop.BinaryConverter;
@@ -19,6 +22,7 @@ public class BinaryConverterTesting implements TestSubject {
 	public void runAllTests() throws TestFailureException {
 		BinaryConverterTesting.testLongConversion();
 		BinaryConverterTesting.testDoubleConversion();
+		BinaryConverterTesting.testLocalDateTimeConversion();
 	}
 	
 	/**
@@ -120,6 +124,59 @@ public class BinaryConverterTesting implements TestSubject {
 				double convertedDouble = BinaryConverter.getDouble(null);
 				throw new TestFailureException(String.format("The conversion of %s to a double should "
 						+ "fail, but was converted into %s.", null, convertedDouble));
+			} catch (NullPointerException e) {
+				// Do nothing as this is expected behaviour.
+			}
+		}
+	}
+	
+	/**
+	 * Test the binary conversion of local date time.
+	 * 
+	 * @throws TestFailureException the test did fail
+	 */
+	private static void testLocalDateTimeConversion() throws TestFailureException {
+		for (int i = 0; i < 10000; i++) {
+			{ // test normal local date time conversion
+				long seconds = TestRunnerWrapper.RANDOM.nextInt();
+				int nano = TestRunnerWrapper.RANDOM.nextInt(1000000000);
+				try {
+					LocalDateTime testLDT = LocalDateTime.ofEpochSecond(seconds, nano, ZoneOffset.UTC);
+					byte[] binaryRep = BinaryConverter.toBytes(testLDT);
+					LocalDateTime convertedLong = BinaryConverter.getLocalDateTime(binaryRep);
+					TestSubject.assertTestCondition(testLDT.equals(convertedLong), 
+							String.format("The local date time %s has been converted to %s and reconverted to %s.", 
+									testLDT, binaryRep, convertedLong));	
+				} catch (DateTimeException e) {
+					/*
+					 * Do nothing as this should only happen if by accident the maximum range of 
+					 * LocalDateTime got exceeded. This error can just be ignored as it should never 
+					 * happen.
+					 */
+					e.printStackTrace();
+				}
+			} { // test invalid byte arrays
+				byte[] randomBytes = new byte[TestRunnerWrapper.RANDOM.nextInt(3000)];
+				TestRunnerWrapper.RANDOM.nextBytes(randomBytes);
+				if (randomBytes.length != BinaryConverter.LOCAL_DATE_TIME_BYTES) {
+					try {
+						LocalDateTime convertedLDT = BinaryConverter.getLocalDateTime(randomBytes);
+						throw new TestFailureException(String.format("The conversion of %s to a "
+								+ "local date time should fail, but was converted into %s.", 
+								Arrays.toString(randomBytes), convertedLDT));
+					} catch (IllegalArgumentException e) {
+						// Do nothing as this is expected behaviour.
+					}
+				} else {
+					// This should be a normal conversion, so do nothing.
+				}
+			}
+		} { // test null
+			try {
+				LocalDateTime convertedLDT = BinaryConverter.getLocalDateTime(null);
+				throw new TestFailureException(String.format("The conversion of %s to a local date time "
+						+ "should fail, but was converted into %s.", 
+						null, convertedLDT));
 			} catch (NullPointerException e) {
 				// Do nothing as this is expected behaviour.
 			}
