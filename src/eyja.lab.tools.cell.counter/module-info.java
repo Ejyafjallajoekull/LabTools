@@ -7,5 +7,6 @@
 module eyja.lab.tools.cell.counter {
 	
 	requires java.base;
+	requires eyja.lab.tools.control.centre;
 	
 }

@@ -7,6 +7,7 @@
 module eyja.lab.tools.control.centre {
 	
 	exports eyja.lab.tools.control.centre.management;
+	exports eyja.lab.tools.control.centre.binaryop;
 	
 	requires java.base;
 	requires central.logging;

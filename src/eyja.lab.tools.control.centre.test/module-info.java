@@ -8,6 +8,7 @@ module eyja.lab.tools.control.centre.test {
 	
 	exports eyja.lab.tools.control.centre.test;
 	exports eyja.lab.tools.control.centre.test.management;
+	exports eyja.lab.tools.control.centre.test.binaryop;
 	
 	requires java.base;
 	requires eyja.lab.tools.control.centre;
