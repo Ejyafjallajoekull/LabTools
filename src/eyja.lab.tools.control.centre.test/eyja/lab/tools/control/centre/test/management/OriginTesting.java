@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.Comparator;
 
 import eyja.lab.tools.control.centre.management.Origin;
 import eyja.lab.tools.control.centre.management.OriginDeserialiser;
@@ -26,6 +27,14 @@ import koro.sensei.tester.TestSubject;
 public class OriginTesting implements TestSubject {
 	
 	private static final String TEST_FOLDER = "LabToolsTestRunnerOrigin/";
+	private static final Comparator<Resource> RESOURCE_COMPARATOR = new Comparator<Resource>() {
+
+		@Override
+		public int compare(Resource o1, Resource o2) {
+			return (int) (o1.getID().getID() - o2.getID().getID());
+		}
+		
+	};
 	private static final OriginDeserialiser TEST_DESERIALISER = new OriginDeserialiser() {
 
 		@Override
@@ -185,10 +194,14 @@ public class OriginTesting implements TestSubject {
 				randomResources[j] = new TestResource(new ResourceID(firstOrigin, j));
 				firstOrigin.requestAdd(randomResources[j]);
 			}
-			TestSubject.assertTestCondition(Arrays.equals(firstOrigin.getResources(), randomResources), 
+			// Sort arrays so they are comparable.
+			Arrays.sort(randomResources, OriginTesting.RESOURCE_COMPARATOR);
+			Resource[] retrievedResources = firstOrigin.getResources();
+			Arrays.sort(retrievedResources, OriginTesting.RESOURCE_COMPARATOR);
+			TestSubject.assertTestCondition(Arrays.equals(retrievedResources, randomResources), 
 					String.format("The origin %s should contain the resources %s, but contains %s.", 
 							firstOrigin, Arrays.toString(randomResources), 
-							Arrays.toString(firstOrigin.getResources())));
+							Arrays.toString(retrievedResources)));
 		}
 	}
 	
