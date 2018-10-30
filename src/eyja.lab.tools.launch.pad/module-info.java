@@ -6,11 +6,11 @@
  */
 module eyja.lab.tools.launch.pad {
 	
-	
+	exports eyja.lab.tools.launch.pad.core;
 	
 	requires java.base;
 	requires central.logging;
-	requires eyja.lab.tools.control.centre;
+	requires transitive eyja.lab.tools.control.centre;
 	requires eyja.lab.tools.cell.counter;
 	
 }
