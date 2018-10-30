@@ -1,5 +1,6 @@
 package eyja.lab.tools.control.centre.management;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -16,7 +17,8 @@ public interface OriginDeserialiser {
 	 * 
 	 * @param originData - the binary representation of an origin
 	 * @param originToBuild - origin to modify by using the deserialiser
+	 * @throws IOException - if the deserialisation failed
 	 */
-	public void deserialise(InputStream originData, Origin originToBuild);
+	public void deserialise(InputStream originData, Origin originToBuild) throws IOException;
 
 }

@@ -1,5 +1,6 @@
 package eyja.lab.tools.control.centre.management;
 
+import java.io.IOException;
 import java.io.OutputStream;
 
 /**
@@ -16,7 +17,8 @@ public interface OriginSerialiser {
 	 *
 	 * @param originData - the stream to serialise the data to
 	 * @param origin - the origin to serialise
+	 * @throws IOException - if the serialisation failed
 	 */
-	public void serialise(OutputStream originData, Origin origin);
+	public void serialise(OutputStream originData, Origin origin) throws IOException;
 
 }
