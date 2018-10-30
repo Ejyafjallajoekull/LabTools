@@ -16,6 +16,11 @@ import java.util.HashMap;
  */
 public class Origin {
 
+	/**
+	 * The default file extension for origins.
+	 */
+	public static final String ORIGIN_EXTENSION = ".ori";
+	
 	private File path = null;
 	private OriginDeserialiser deserialiser = null;
 	private OriginSerialiser serialiser = null;
