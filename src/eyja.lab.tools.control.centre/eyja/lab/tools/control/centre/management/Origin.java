@@ -242,6 +242,13 @@ public class Origin {
 	}
 	
 	/**
+	 * Removes all resources from the origin.
+	 */
+	public void clear() {
+		this.resourceMap.clear();
+	}
+	
+	/**
 	 * Request an unique ID from the origin. This ID can be used to reference specific resources.
 	 * 
 	 * @return a unique ID

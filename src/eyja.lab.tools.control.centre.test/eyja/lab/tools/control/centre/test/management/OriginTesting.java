@@ -75,6 +75,7 @@ public class OriginTesting implements TestSubject {
 		OriginTesting.testAddingResources();
 		OriginTesting.testRetrieve();
 		OriginTesting.testRemove();
+		OriginTesting.testClear();
 		OriginTesting.testRequestID();
 		OriginTesting.testIO();
 	}
@@ -364,6 +365,30 @@ public class OriginTesting implements TestSubject {
 				}
 			}
 
+		}
+	}
+	
+	/**
+	 * Test clearing all resources from the origin.
+	 * 
+	 * @throws TestFailureException the test did fail
+	 */
+	private static void testClear() throws TestFailureException {
+		for (int i = 0; i < 10000; i++) {
+			{ // test explicit removal
+				Origin clearOrigin = OriginTesting.createRandomOrigin();
+				// add some random resources
+				int randomNumResource = TestRunnerWrapper.RANDOM.nextInt(300);
+				for (int j = 0; j < randomNumResource; j++) {
+					clearOrigin.requestAdd(new TestResource());
+				}
+				clearOrigin.clear();
+				Resource[] allResources = clearOrigin.getResources(); 
+				TestSubject.assertTestCondition(allResources.length == 0, 
+						String.format("The cleared origin %s should not contain any resources "
+								+ "after clearing, but contains %s.", 
+								clearOrigin, Arrays.toString(allResources)));
+			}
 		}
 	}
 	
