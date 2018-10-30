@@ -17,6 +17,19 @@ public final class BinaryConverter {
 	 */
 	public static final int LOCAL_DATE_TIME_BYTES = Integer.BYTES * 7;
 	
+	private static final byte BOOLEAN_FALSE = 0;
+	private static final byte BOOLEAN_TRUE = 1;
+	
+	/**
+	 * Convert the specified byte into a boolean.
+	 * 
+	 * @param binaryBoolean - the binary representation of a primitive boolean
+	 * @return the boolean represented by the supplied byte
+	 */
+	public static boolean getBoolean(byte binaryBoolean) {
+		return binaryBoolean != BinaryConverter.BOOLEAN_FALSE;
+	}
+	
 	/**
 	 * Convert the specified array of bytes into an int.
 	 * 
@@ -110,6 +123,20 @@ public final class BinaryConverter {
 			}
 		} else {
 			throw new NullPointerException("Null cannot converted to a primitive value.");
+		}
+	}
+	
+	/**
+	 * Convert the specified primitive boolean to its binary representation.
+	 * 
+	 * @param b - the boolean to convert into its binary representation
+	 * @return the binary representation of the specified boolean
+	 */
+	public static byte toBytes(boolean b) {
+		if (b) {
+			return BinaryConverter.BOOLEAN_TRUE;
+		} else {
+			return BinaryConverter.BOOLEAN_FALSE;
 		}
 	}
 	

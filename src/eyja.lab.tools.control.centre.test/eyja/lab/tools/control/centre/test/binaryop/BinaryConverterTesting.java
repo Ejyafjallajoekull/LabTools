@@ -20,10 +20,29 @@ public class BinaryConverterTesting implements TestSubject {
 
 	@Override
 	public void runAllTests() throws TestFailureException {
+		BinaryConverterTesting.testBooleanConversion();
 		BinaryConverterTesting.testIntConversion();
 		BinaryConverterTesting.testLongConversion();
 		BinaryConverterTesting.testDoubleConversion();
 		BinaryConverterTesting.testLocalDateTimeConversion();
+	}
+	
+	/**
+	 * Test the binary conversion of booleans.
+	 * 
+	 * @throws TestFailureException the test did fail
+	 */
+	private static void testBooleanConversion() throws TestFailureException {
+		for (int i = 0; i < 10000; i++) {
+			{ // test normal boolean conversion
+				boolean testBool = TestRunnerWrapper.RANDOM.nextBoolean();
+				byte binaryRep = BinaryConverter.toBytes(testBool);
+				boolean convertedInt = BinaryConverter.getBoolean(binaryRep);
+				TestSubject.assertTestCondition(testBool == convertedInt, 
+						String.format("The boolean %s has been converted to %s and reconverted to %s.", 
+								testBool, binaryRep, convertedInt));
+			} 
+		}
 	}
 	
 	/**
@@ -36,7 +55,7 @@ public class BinaryConverterTesting implements TestSubject {
 			{ // test normal int conversion
 				int testInt = TestRunnerWrapper.RANDOM.nextInt();
 				byte[] binaryRep = BinaryConverter.toBytes(testInt);
-				long convertedInt = BinaryConverter.getInt(binaryRep);
+				int convertedInt = BinaryConverter.getInt(binaryRep);
 				TestSubject.assertTestCondition(testInt == convertedInt, 
 						String.format("The int %s has been converted to %s and reconverted to %s.", 
 								testInt, binaryRep, convertedInt));
