@@ -13,6 +13,10 @@ import eyja.lab.tools.control.centre.management.Resource;
  */
 public class Dilution extends Resource {
 	
+	/**
+	 * The resource type.
+	 */
+	public static final CellCountResourceType type = CellCountResourceType.DILUTION;
 	private LocalDateTime timeOfDilution = null;
 	private double dilutionVolume = -1;
 	private double sampleVolume = -1;
@@ -104,15 +108,17 @@ public class Dilution extends Resource {
 	@Override
 	public byte[] serialise() {
 		if (this.getID() != null) {
-			byte[] serialisation = new byte[Long.BYTES + Double.BYTES * 2 + BinaryConverter.LOCAL_DATE_TIME_BYTES];
+			byte[] type = BinaryConverter.toBytes(Dilution.type.ordinal());
 			byte[] id = BinaryConverter.toBytes(this.getID().getID());
 			byte[] ldt = BinaryConverter.toBytes(this.timeOfDilution);
 			byte[] sample = BinaryConverter.toBytes(this.sampleVolume);
 			byte[] dilution = BinaryConverter.toBytes(this.dilutionVolume);
-			System.arraycopy(id, 0, serialisation, 0, id.length);
-			System.arraycopy(ldt, 0, serialisation, id.length, ldt.length);
-			System.arraycopy(sample, 0, serialisation, id.length + ldt.length, sample.length);
-			System.arraycopy(dilution, 0, serialisation, id.length + ldt.length + sample.length, dilution.length);
+			byte[] serialisation = new byte[type.length + id.length + ldt.length + sample.length + dilution.length];
+			System.arraycopy(type, 0, serialisation, 0, type.length);
+			System.arraycopy(id, 0, serialisation, type.length, id.length);
+			System.arraycopy(ldt, 0, serialisation, type.length + id.length, ldt.length);
+			System.arraycopy(sample, 0, serialisation, type.length + id.length + ldt.length, sample.length);
+			System.arraycopy(dilution, 0, serialisation, type.length + id.length + ldt.length + sample.length, dilution.length);
 			return serialisation;
 		} else {
 			throw new NullPointerException(String.format("%s cannot be serialised without an resource "

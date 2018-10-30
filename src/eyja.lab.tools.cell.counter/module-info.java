@@ -6,6 +6,9 @@
  */
 module eyja.lab.tools.cell.counter {
 	
+	exports eyja.lab.tools.cell.counter.core;
+	exports eyja.lab.tools.cell.counter.functionality;
+	
 	requires java.base;
 	requires eyja.lab.tools.control.centre;
 	

@@ -13,6 +13,10 @@ import eyja.lab.tools.control.centre.management.Resource;
  */
 public class Count extends Resource {
 
+	/**
+	 * The resource type.
+	 */
+	public static final CellCountResourceType type = CellCountResourceType.COUNT;
 	private LocalDateTime timeOfCounting = null;
 	private double countingDensity = -1.0d;
 	
@@ -129,13 +133,15 @@ public class Count extends Resource {
 	@Override
 	public byte[] serialise() {
 		if (this.getID() != null) {
-			byte[] serialisation = new byte[Long.BYTES + Double.BYTES + BinaryConverter.LOCAL_DATE_TIME_BYTES];
+			byte[] type = BinaryConverter.toBytes(Count.type.ordinal());
 			byte[] id = BinaryConverter.toBytes(this.getID().getID());
 			byte[] ldt = BinaryConverter.toBytes(this.timeOfCounting);
 			byte[] count = BinaryConverter.toBytes(this.countingDensity);
-			System.arraycopy(id, 0, serialisation, 0, id.length);
-			System.arraycopy(ldt, 0, serialisation, id.length, ldt.length);
-			System.arraycopy(count, 0, serialisation, id.length + ldt.length, count.length);
+			byte[] serialisation = new byte[type.length + id.length + ldt.length + count.length];
+			System.arraycopy(type, 0, serialisation, 0, type.length);
+			System.arraycopy(id, 0, serialisation, type.length, id.length);
+			System.arraycopy(ldt, 0, serialisation, type.length + id.length, ldt.length);
+			System.arraycopy(count, 0, serialisation, type.length + id.length + ldt.length, count.length);
 			return serialisation;
 		} else {
 			throw new NullPointerException(String.format("%s cannot be serialised without an resource "
