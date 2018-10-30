@@ -18,6 +18,28 @@ public final class BinaryConverter {
 	public static final int LOCAL_DATE_TIME_BYTES = Integer.BYTES * 7;
 	
 	/**
+	 * Convert the specified array of bytes into an int.
+	 * 
+	 * @param binaryInt - the binary representation of a primitive int
+	 * @return the int represented by the supplied byte array
+	 * @throws NullPointerException if the specified byte array is null
+	 * @throws IllegalArgumentException if the length of the specified byte array is different from 
+	 * the binary int
+	 */
+	public static int getInt(byte[] binaryInt) {
+		if (binaryInt != null) {
+			if (binaryInt.length == Integer.BYTES) {
+				return ByteBuffer.wrap(binaryInt).getInt();
+			} else {
+				throw new IllegalArgumentException(String.format("%s bytes are needed for conversion, "
+						+ "but %s are supplied.", Integer.BYTES, binaryInt.length));
+			}
+		} else {
+			throw new NullPointerException("Null cannot converted to a primitive value.");
+		}
+	}
+	
+	/**
 	 * Convert the specified array of bytes into a long.
 	 * 
 	 * @param binaryLong - the binary representation of a primitive long
@@ -89,6 +111,18 @@ public final class BinaryConverter {
 		} else {
 			throw new NullPointerException("Null cannot converted to a primitive value.");
 		}
+	}
+	
+	/**
+	 * Convert the specified primitive int to its binary representation.
+	 * 
+	 * @param i - the int to convert into its binary representation
+	 * @return the binary representation of the specified int
+	 */
+	public static byte[] toBytes(int i) {
+		byte[] binaryInt = new byte[Integer.BYTES];
+		ByteBuffer.wrap(binaryInt).putInt(i);
+		return binaryInt;
 	}
 	
 	/**

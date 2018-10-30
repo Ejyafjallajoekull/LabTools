@@ -20,9 +20,52 @@ public class BinaryConverterTesting implements TestSubject {
 
 	@Override
 	public void runAllTests() throws TestFailureException {
+		BinaryConverterTesting.testIntConversion();
 		BinaryConverterTesting.testLongConversion();
 		BinaryConverterTesting.testDoubleConversion();
 		BinaryConverterTesting.testLocalDateTimeConversion();
+	}
+	
+	/**
+	 * Test the binary conversion of ints.
+	 * 
+	 * @throws TestFailureException the test did fail
+	 */
+	private static void testIntConversion() throws TestFailureException {
+		for (int i = 0; i < 10000; i++) {
+			{ // test normal int conversion
+				int testInt = TestRunnerWrapper.RANDOM.nextInt();
+				byte[] binaryRep = BinaryConverter.toBytes(testInt);
+				long convertedInt = BinaryConverter.getInt(binaryRep);
+				TestSubject.assertTestCondition(testInt == convertedInt, 
+						String.format("The int %s has been converted to %s and reconverted to %s.", 
+								testInt, binaryRep, convertedInt));
+			} { // test invalid byte arrays
+				byte[] randomBytes = new byte[TestRunnerWrapper.RANDOM.nextInt(3000)];
+				TestRunnerWrapper.RANDOM.nextBytes(randomBytes);
+				if (randomBytes.length != Integer.BYTES) {
+					try {
+						long convertedInt = BinaryConverter.getInt(randomBytes);
+						throw new TestFailureException(String.format("The conversion of %s to a int should "
+								+ "fail, but was converted into %s.", Arrays.toString(randomBytes), 
+								convertedInt));
+					} catch (IllegalArgumentException e) {
+						// Do nothing as this is expected behaviour.
+					}
+				} else {
+					// This should be a normal conversion, so do nothing.
+					BinaryConverter.getInt(randomBytes);
+				}
+			}
+		} { // test null
+			try {
+				long convertedLong = BinaryConverter.getLong(null);
+				throw new TestFailureException(String.format("The conversion of %s to a long should "
+						+ "fail, but was converted into %s.", null, convertedLong));
+			} catch (NullPointerException e) {
+				// Do nothing as this is expected behaviour.
+			}
+		}
 	}
 	
 	/**
