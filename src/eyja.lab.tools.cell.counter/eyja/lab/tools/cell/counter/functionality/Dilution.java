@@ -22,6 +22,21 @@ public class Dilution extends Resource {
 	private double sampleVolume = -1;
 	
 	/**
+	 * Create a new dilution event diluting the specified sample volume in milliliter in the 
+	 * specified dilution volume in milliliters at the specified time and date.
+	 * 
+	 * @param sampleVolume - the volume diluted with the dilution volume in ml
+	 * @param dilutionVolume - the volume used to dilute the sample volume in ml
+	 * @param time - the time and date of the dilution event
+	 * @throws IllegalArgumentException if the sample or dilution volume is negative
+	 */
+	public Dilution(double sampleVolume, double dilutionVolume, LocalDateTime time) {
+		this.setUsedSampleVolume(sampleVolume);
+		this.setDilutionVolume(dilutionVolume);
+		this.setTime(time);
+	}
+	
+	/**
 	 * Get the sample volume in milliliter used for dilution.
 	 * 
 	 * @return the sample volume diluted with the dilution volume
@@ -42,8 +57,7 @@ public class Dilution extends Resource {
 	/**
 	 * Set the sample volume in milliliter used for dilution.
 	 * 
-	 * @param sampleVolume - the volume diluted with the dilution volume
-	 * 
+	 * @param sampleVolume - the volume diluted with the dilution volume in ml
 	 * @throws IllegalArgumentException if the sample volume is negative
 	 */
 	public void setUsedSampleVolume(double sampleVolume) {
@@ -58,7 +72,7 @@ public class Dilution extends Resource {
 	/**
 	 * Set the volume in milliliter used for dilution.
 	 * 
-	 * @param dilutionVolume - the volume used to dilute the sample volume
+	 * @param dilutionVolume - the volume used to dilute the sample volume in ml
 	 * 
 	 * @throws IllegalArgumentException if the dilution volume is negative
 	 */
