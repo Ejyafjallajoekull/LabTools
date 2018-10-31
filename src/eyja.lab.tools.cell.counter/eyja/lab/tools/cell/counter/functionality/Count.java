@@ -142,7 +142,7 @@ public class Count extends Resource {
 	@Override
 	public byte[] serialise() {
 		if (this.getID() != null) {
-			byte[] type = BinaryConverter.toBytes(Count.type.ordinal());
+			byte[] type = Count.type.toBytes();
 			byte[] id = BinaryConverter.toBytes(this.getID().getID());
 			byte[] ldt = BinaryConverter.toBytes(this.timeOfCounting);
 			byte[] chamber = new byte[] {BinaryConverter.toBytes(this.chamberUsed)};
