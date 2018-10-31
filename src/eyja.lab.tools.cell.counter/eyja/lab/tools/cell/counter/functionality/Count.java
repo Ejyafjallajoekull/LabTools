@@ -19,6 +19,10 @@ public class Count extends Resource {
 	public static final CellCountResourceType type = CellCountResourceType.COUNT;
 	private LocalDateTime timeOfCounting = null;
 	private double countingDensity = -1.0d;
+	boolean chamberUsed = false;
+	private int chamberCount = -1;
+	private int countedSquares = -1;
+	private double squareVolume = -1.0d;
 	
 	/**
 	 * Create a new cell counting event with the specified cell density in cells per 
@@ -64,6 +68,7 @@ public class Count extends Resource {
 	 */
 	public void setCellDensity(double density) {
 		if (density >= 0.0d) {
+			this.chamberUsed = false;
 			this.countingDensity = density;
 		} else {
 			throw new IllegalArgumentException(String.format("The cell density (%s) can not be "
@@ -86,7 +91,11 @@ public class Count extends Resource {
 	 */
 	public void setCellDensity(int chamberCount, int countedSquares, double squareVolume) {
 		if (chamberCount >= 0 && countedSquares > 0 && squareVolume > 0.0d) {
+			this.chamberUsed = true;
 			this.countingDensity = (double) chamberCount / (countedSquares * squareVolume * 1000);
+			this.chamberCount = chamberCount;
+			this.countedSquares = countedSquares;
+			this.squareVolume = squareVolume;
 		} else {
 			throw new IllegalArgumentException(String.format("The cell count (%s) can not be "
 					+ "negative, at least one square (%s) must be counted and the volume of a single "
@@ -136,12 +145,28 @@ public class Count extends Resource {
 			byte[] type = BinaryConverter.toBytes(Count.type.ordinal());
 			byte[] id = BinaryConverter.toBytes(this.getID().getID());
 			byte[] ldt = BinaryConverter.toBytes(this.timeOfCounting);
-			byte[] count = BinaryConverter.toBytes(this.countingDensity);
+			byte[] chamber = new byte[] {BinaryConverter.toBytes(this.chamberUsed)};
+			byte[] count = null;
+			if (this.chamberUsed) {
+				byte[] chamberCount = BinaryConverter.toBytes(this.chamberCount);
+				byte[] countedSquares = BinaryConverter.toBytes(this.countedSquares);
+				byte[] squareVolume = BinaryConverter.toBytes(this.squareVolume);
+				count = new byte[chamberCount.length + countedSquares.length + squareVolume.length];
+				System.arraycopy(chamberCount, 0, count, 0, chamberCount.length);
+				System.arraycopy(countedSquares, 0, count, chamberCount.length, countedSquares.length);
+				System.arraycopy(squareVolume, 0, count, 
+						chamberCount.length + countedSquares.length, squareVolume.length);
+			} else {
+				count = BinaryConverter.toBytes(this.countingDensity);
+			}
 			byte[] serialisation = new byte[type.length + id.length + ldt.length + count.length];
 			System.arraycopy(type, 0, serialisation, 0, type.length);
 			System.arraycopy(id, 0, serialisation, type.length, id.length);
 			System.arraycopy(ldt, 0, serialisation, type.length + id.length, ldt.length);
-			System.arraycopy(count, 0, serialisation, type.length + id.length + ldt.length, count.length);
+			System.arraycopy(chamber, 0, serialisation, 
+					type.length + id.length + ldt.length, chamber.length);
+			System.arraycopy(count, 0, serialisation, 
+					type.length + id.length + ldt.length + chamber.length, count.length);
 			return serialisation;
 		} else {
 			throw new NullPointerException(String.format("%s cannot be serialised without an resource "
