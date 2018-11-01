@@ -1,7 +1,13 @@
 package eyja.lab.tools.control.centre.binaryop;
 
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+
+import eyja.lab.tools.control.centre.management.ResourceReference;
 
 /**
  * The BinaryConverter class provides functionality for serialising and deserialising primitive 
@@ -19,6 +25,7 @@ public final class BinaryConverter {
 	
 	private static final byte BOOLEAN_FALSE = 0;
 	private static final byte BOOLEAN_TRUE = 1;
+	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 	
 	/**
 	 * Convert the specified byte into a boolean.
@@ -127,6 +134,36 @@ public final class BinaryConverter {
 	}
 	
 	/**
+	 * Convert the specified array of bytes into a resource reference. May be null.
+	 * 
+	 * @param binaryReference - the binary representation of a resource reference
+	 * @return the resource reference represented by the supplied byte array
+	 * @throws NullPointerException if the specified byte array is null
+	 */
+	public static ResourceReference getResourceReference(byte[] binaryReference) {
+		if (binaryReference != null) {
+			ByteBuffer refBuffer = ByteBuffer.wrap(binaryReference);
+			try {
+				int lengthOrigin = refBuffer.getInt();
+				if (lengthOrigin >= 0) {
+					byte[] binaryOrigin = new byte[lengthOrigin];
+					refBuffer.get(binaryOrigin);
+					String origin = new String(binaryOrigin, BinaryConverter.DEFAULT_CHARSET);
+					long id = refBuffer.getLong();
+					return new ResourceReference(origin, id);
+				} else {
+					return null;
+				}
+			} catch (BufferUnderflowException e) {
+				throw new IllegalArgumentException(String.format("%s cannot be resolved to a resource "
+						+ "reference.", Arrays.toString(binaryReference)), e);
+			}
+		} else {
+			throw new NullPointerException("Null cannot converted to a primitive value.");
+		}
+	}
+	
+	/**
 	 * Convert the specified primitive boolean to its binary representation.
 	 * 
 	 * @param b - the boolean to convert into its binary representation
@@ -195,5 +232,26 @@ public final class BinaryConverter {
 		return binaryDate;
 	}
 	
+	/**
+	 * Convert the specified resource reference to its binary representation. Will return the binary 
+	 * integer -1 if null is passed instead of the length of the referenced origin.
+	 * 
+	 * @param reference - the resource reference to convert into its binary representation
+	 * @return the binary representation of the specified resource reference or the integer -1
+	 */
+	public static byte[] toBytes(ResourceReference reference) {
+		if (reference != null) {
+			byte[] origin = reference.getOrigin().getBytes(BinaryConverter.DEFAULT_CHARSET);
+			byte[] length = BinaryConverter.toBytes(origin.length);
+			byte[] id = BinaryConverter.toBytes(reference.getID());
+			byte[] binaryRef = new byte[length.length + origin.length + id.length];
+			System.arraycopy(length, 0, binaryRef, 0, length.length);
+			System.arraycopy(origin, 0, binaryRef, length.length, origin.length);
+			System.arraycopy(id, 0, binaryRef, length.length + origin.length, id.length);
+			return binaryRef;
+		} else {
+			return BinaryConverter.toBytes(-1);
+		}
+	}
 	
 }

@@ -6,6 +6,7 @@ import java.time.ZoneOffset;
 import java.util.Arrays;
 
 import eyja.lab.tools.control.centre.binaryop.BinaryConverter;
+import eyja.lab.tools.control.centre.management.ResourceReference;
 import eyja.lab.tools.control.centre.test.TestRunnerWrapper;
 import koro.sensei.tester.TestFailureException;
 import koro.sensei.tester.TestSubject;
@@ -25,6 +26,7 @@ public class BinaryConverterTesting implements TestSubject {
 		BinaryConverterTesting.testLongConversion();
 		BinaryConverterTesting.testDoubleConversion();
 		BinaryConverterTesting.testLocalDateTimeConversion();
+		BinaryConverterTesting.testResourceReferenceConversion();
 	}
 	
 	/**
@@ -205,10 +207,10 @@ public class BinaryConverterTesting implements TestSubject {
 				try {
 					LocalDateTime testLDT = LocalDateTime.ofEpochSecond(seconds, nano, ZoneOffset.UTC);
 					byte[] binaryRep = BinaryConverter.toBytes(testLDT);
-					LocalDateTime convertedLong = BinaryConverter.getLocalDateTime(binaryRep);
-					TestSubject.assertTestCondition(testLDT.equals(convertedLong), 
+					LocalDateTime convertedLDT = BinaryConverter.getLocalDateTime(binaryRep);
+					TestSubject.assertTestCondition(testLDT.equals(convertedLDT), 
 							String.format("The local date time %s has been converted to %s and reconverted to %s.", 
-									testLDT, binaryRep, convertedLong));	
+									testLDT, binaryRep, convertedLDT));	
 				} catch (DateTimeException e) {
 					/*
 					 * Do nothing as this should only happen if by accident the maximum range of 
@@ -242,6 +244,42 @@ public class BinaryConverterTesting implements TestSubject {
 			} catch (NullPointerException e) {
 				// Do nothing as this is expected behaviour.
 			}
+		}
+	}
+	
+	/**
+	 * Test the binary conversion of resource references.
+	 * 
+	 * @throws TestFailureException the test did fail
+	 */
+	private static void testResourceReferenceConversion() throws TestFailureException {
+		for (int i = 0; i < 10000; i++) {
+			{ // test normal resource reference conversion
+				ResourceReference testRef = new ResourceReference(TestRunnerWrapper.createRandomString(), 
+						TestRunnerWrapper.RANDOM.nextLong());
+				byte[] binaryRep = BinaryConverter.toBytes(testRef);
+				ResourceReference convertedRef = BinaryConverter.getResourceReference(binaryRep);
+				TestSubject.assertTestCondition(testRef.equals(convertedRef), 
+						String.format("The resource reference %s has been converted to %s and reconverted to %s.", 
+								testRef, binaryRep, convertedRef));
+			} { // test invalid byte arrays
+				byte[] randomBytes = BinaryConverter.toBytes(TestRunnerWrapper.RANDOM.nextInt(3000000));
+				try {
+					ResourceReference convertedRef = BinaryConverter.getResourceReference(randomBytes);
+					throw new TestFailureException(String.format("The conversion of %s to a "
+							+ "resource reference should fail, but was converted into %s.", 
+							Arrays.toString(randomBytes), convertedRef));
+				} catch (IllegalArgumentException e) {
+					// Do nothing as this is expected behaviour.
+				}
+			}
+		} { // test null
+			ResourceReference nullRef = null;
+			byte[] binaryRep = BinaryConverter.toBytes(nullRef);
+			ResourceReference convertedRef = BinaryConverter.getResourceReference(binaryRep);
+			TestSubject.assertTestCondition(nullRef == convertedRef, 
+					String.format("The resource reference %s has been converted to %s and reconverted to %s.", 
+							nullRef, binaryRep, convertedRef));
 		}
 	}
 
