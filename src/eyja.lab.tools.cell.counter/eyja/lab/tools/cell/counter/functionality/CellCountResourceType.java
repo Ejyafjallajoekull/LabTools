@@ -13,6 +13,10 @@ public enum CellCountResourceType {
 	COUNTED_DILUTION((byte) 2),
 	COUNTING_SERIES((byte) 3);
 	
+	/**
+	 * The number of bytes needed for serialisation of a cell count resource type
+	 */
+	public static final int BYTES = Byte.BYTES;
 	private byte identifier = -1;
 	
 	private CellCountResourceType(byte identifier) {
