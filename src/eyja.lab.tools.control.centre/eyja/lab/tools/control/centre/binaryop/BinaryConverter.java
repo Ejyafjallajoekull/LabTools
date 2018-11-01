@@ -104,6 +104,36 @@ public final class BinaryConverter {
 	}
 	
 	/**
+	 * Convert the specified array of bytes into a string. May be null.
+	 * 
+	 * @param binaryString - the binary representation of a string
+	 * @return the string represented by the supplied byte array
+	 * @throws NullPointerException if the specified byte array is null
+	 * @throws IllegalArgumentException if the length of the specified byte array is not sufficient 
+	 * for creating a string
+	 */
+	public static String getString(byte[] binaryString) {
+		if (binaryString != null) {
+			ByteBuffer stringBuffer = ByteBuffer.wrap(binaryString);
+			try {
+				int lengthString = stringBuffer.getInt();
+				if (lengthString >= 0) {
+					byte[] unprefixedString = new byte[lengthString];
+					stringBuffer.get(unprefixedString);
+					return new String(unprefixedString, BinaryConverter.DEFAULT_CHARSET);
+				} else {
+					return null;
+				}
+			} catch (BufferUnderflowException e) {
+				throw new IllegalArgumentException(String.format("%s cannot be resolved to a string."
+						, Arrays.toString(binaryString)), e);
+			}
+		} else {
+			throw new NullPointerException("Null cannot converted to a string.");
+		}
+	}
+	
+	/**
 	 * Convert the specified array of bytes into a local date time.
 	 * 
 	 * @param binaryLocalDateTime - the binary representation of a local date time
@@ -129,7 +159,7 @@ public final class BinaryConverter {
 						+ "but %s are supplied.", Double.BYTES, binaryLocalDateTime.length));
 			}
 		} else {
-			throw new NullPointerException("Null cannot converted to a primitive value.");
+			throw new NullPointerException("Null cannot converted to a local date time.");
 		}
 	}
 	
@@ -139,6 +169,8 @@ public final class BinaryConverter {
 	 * @param binaryReference - the binary representation of a resource reference
 	 * @return the resource reference represented by the supplied byte array
 	 * @throws NullPointerException if the specified byte array is null
+	 * @throws IllegalArgumentException if the length of the specified byte array is not sufficient 
+	 * for creating a resource reference
 	 */
 	public static ResourceReference getResourceReference(byte[] binaryReference) {
 		if (binaryReference != null) {
@@ -159,7 +191,7 @@ public final class BinaryConverter {
 						+ "reference.", Arrays.toString(binaryReference)), e);
 			}
 		} else {
-			throw new NullPointerException("Null cannot converted to a primitive value.");
+			throw new NullPointerException("Null cannot converted to a resource reference.");
 		}
 	}
 	
@@ -214,6 +246,26 @@ public final class BinaryConverter {
 	}
 	
 	/**
+	 * Convert the specified string to its length prefixed binary representation. Will return the binary 
+	 * integer -1 instead of the length of the string if null is passed.
+	 * 
+	 * @param s - the string to convert into its binary representation
+	 * @return the binary representation of the specified string or the integer -1
+	 */
+	public static byte[] toBytes(String s) {
+		if (s != null) {
+			byte[] string = s.getBytes(BinaryConverter.DEFAULT_CHARSET);
+			byte[] length = BinaryConverter.toBytes(string.length);
+			byte[] binaryRef = new byte[length.length + string.length];
+			System.arraycopy(length, 0, binaryRef, 0, length.length);
+			System.arraycopy(string, 0, binaryRef, length.length, string.length);
+			return binaryRef;
+		} else {
+			return BinaryConverter.toBytes(-1);
+		}
+	}
+	
+	/**
 	 * Convert the specified local date time to its binary representation.
 	 * 
 	 * @param dateTime - the local date time to convert into its binary representation
@@ -234,7 +286,7 @@ public final class BinaryConverter {
 	
 	/**
 	 * Convert the specified resource reference to its binary representation. Will return the binary 
-	 * integer -1 if null is passed instead of the length of the referenced origin.
+	 * integer -1 instead of the length of the referenced origin if null is passed.
 	 * 
 	 * @param reference - the resource reference to convert into its binary representation
 	 * @return the binary representation of the specified resource reference or the integer -1

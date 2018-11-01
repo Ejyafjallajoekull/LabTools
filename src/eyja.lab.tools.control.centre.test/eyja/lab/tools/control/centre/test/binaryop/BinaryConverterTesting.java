@@ -25,6 +25,7 @@ public class BinaryConverterTesting implements TestSubject {
 		BinaryConverterTesting.testIntConversion();
 		BinaryConverterTesting.testLongConversion();
 		BinaryConverterTesting.testDoubleConversion();
+		BinaryConverterTesting.testStringConversion();
 		BinaryConverterTesting.testLocalDateTimeConversion();
 		BinaryConverterTesting.testResourceReferenceConversion();
 	}
@@ -191,6 +192,41 @@ public class BinaryConverterTesting implements TestSubject {
 			} catch (NullPointerException e) {
 				// Do nothing as this is expected behaviour.
 			}
+		}
+	}
+	
+	/**
+	 * Test the binary conversion of strings.
+	 * 
+	 * @throws TestFailureException the test did fail
+	 */
+	private static void testStringConversion() throws TestFailureException {
+		for (int i = 0; i < 10000; i++) {
+			{ // test normal string conversion
+				String testString = TestRunnerWrapper.createRandomString();
+				byte[] binaryRep = BinaryConverter.toBytes(testString);
+				String convertedString = BinaryConverter.getString(binaryRep);
+				TestSubject.assertTestCondition(testString.equals(convertedString), 
+						String.format("The string %s has been converted to %s and reconverted to %s.", 
+								testString, binaryRep, convertedString));
+			} { // test invalid byte arrays
+				byte[] randomBytes = BinaryConverter.toBytes(TestRunnerWrapper.RANDOM.nextInt(3000000));
+				try {
+					ResourceReference convertedString = BinaryConverter.getResourceReference(randomBytes);
+					throw new TestFailureException(String.format("The conversion of %s to a "
+							+ "string should fail, but was converted into %s.", 
+							Arrays.toString(randomBytes), convertedString));
+				} catch (IllegalArgumentException e) {
+					// Do nothing as this is expected behaviour.
+				}
+			}
+		} { // test null
+			String nullString = null;
+			byte[] binaryRep = BinaryConverter.toBytes(nullString);
+			String convertedString = BinaryConverter.getString(binaryRep);
+			TestSubject.assertTestCondition(nullString == convertedString, 
+					String.format("The string %s has been converted to %s and reconverted to %s.", 
+							nullString, binaryRep, convertedString));
 		}
 	}
 	
