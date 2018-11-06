@@ -135,7 +135,7 @@ public class Dilution extends Resource {
 			System.arraycopy(dilution, 0, serialisation, type.length + id.length + ldt.length + sample.length, dilution.length);
 			return serialisation;
 		} else {
-			throw new NullPointerException(String.format("%s cannot be serialised without an resource "
+			throw new NullPointerException(String.format("%s cannot be serialised without a resource "
 					+ "ID.", this));
 		}
 	}

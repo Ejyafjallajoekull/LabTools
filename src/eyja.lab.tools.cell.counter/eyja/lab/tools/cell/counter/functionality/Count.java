@@ -169,7 +169,7 @@ public class Count extends Resource {
 					type.length + id.length + ldt.length + chamber.length, count.length);
 			return serialisation;
 		} else {
-			throw new NullPointerException(String.format("%s cannot be serialised without an resource "
+			throw new NullPointerException(String.format("%s cannot be serialised without a resource "
 					+ "ID.", this));
 		}
 	}
