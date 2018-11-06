@@ -19,6 +19,22 @@ import eyja.lab.tools.control.centre.management.ResourceReference;
 public final class BinaryConverter {
 	
 	/**
+	 * The length of the binary representation of a boolean.
+	 */
+	public static final int BOOLEAN_BYTES = 1;
+	/**
+	 * The length of the binary representation of an integer.
+	 */
+	public static final int INTEGER_BYTES = Integer.BYTES;
+	/**
+	 * The length of the binary representation of a long.
+	 */
+	public static final int LONG_BYTES = Long.BYTES;
+	/**
+	 * The length of the binary representation of an double.
+	 */
+	public static final int DOUBLE_BYTES = Double.BYTES;
+	/**
 	 * The length of the binary representation of a LocalDateTime object.
 	 */
 	public static final int LOCAL_DATE_TIME_BYTES = Integer.BYTES * 7;
@@ -48,11 +64,11 @@ public final class BinaryConverter {
 	 */
 	public static int getInt(byte[] binaryInt) {
 		if (binaryInt != null) {
-			if (binaryInt.length == Integer.BYTES) {
+			if (binaryInt.length == BinaryConverter.INTEGER_BYTES) {
 				return ByteBuffer.wrap(binaryInt).getInt();
 			} else {
 				throw new IllegalArgumentException(String.format("%s bytes are needed for conversion, "
-						+ "but %s are supplied.", Integer.BYTES, binaryInt.length));
+						+ "but %s are supplied.", BinaryConverter.INTEGER_BYTES, binaryInt.length));
 			}
 		} else {
 			throw new NullPointerException("Null cannot converted to a primitive value.");
@@ -70,11 +86,11 @@ public final class BinaryConverter {
 	 */
 	public static long getLong(byte[] binaryLong) {
 		if (binaryLong != null) {
-			if (binaryLong.length == Long.BYTES) {
+			if (binaryLong.length == BinaryConverter.LONG_BYTES) {
 				return ByteBuffer.wrap(binaryLong).getLong();
 			} else {
 				throw new IllegalArgumentException(String.format("%s bytes are needed for conversion, "
-						+ "but %s are supplied.", Long.BYTES, binaryLong.length));
+						+ "but %s are supplied.", BinaryConverter.LONG_BYTES, binaryLong.length));
 			}
 		} else {
 			throw new NullPointerException("Null cannot converted to a primitive value.");
@@ -92,11 +108,11 @@ public final class BinaryConverter {
 	 */
 	public static double getDouble(byte[] binaryDouble) {
 		if (binaryDouble != null) {
-			if (binaryDouble.length == Double.BYTES) {
+			if (binaryDouble.length == BinaryConverter.DOUBLE_BYTES) {
 				return ByteBuffer.wrap(binaryDouble).getDouble();
 			} else {
 				throw new IllegalArgumentException(String.format("%s bytes are needed for conversion, "
-						+ "but %s are supplied.", Double.BYTES, binaryDouble.length));
+						+ "but %s are supplied.", BinaryConverter.DOUBLE_BYTES, binaryDouble.length));
 			}
 		} else {
 			throw new NullPointerException("Null cannot converted to a primitive value.");
@@ -216,7 +232,7 @@ public final class BinaryConverter {
 	 * @return the binary representation of the specified int
 	 */
 	public static byte[] toBytes(int i) {
-		byte[] binaryInt = new byte[Integer.BYTES];
+		byte[] binaryInt = new byte[BinaryConverter.INTEGER_BYTES];
 		ByteBuffer.wrap(binaryInt).putInt(i);
 		return binaryInt;
 	}
@@ -228,7 +244,7 @@ public final class BinaryConverter {
 	 * @return the binary representation of the specified long
 	 */
 	public static byte[] toBytes(long l) {
-		byte[] binaryLong = new byte[Long.BYTES];
+		byte[] binaryLong = new byte[BinaryConverter.LONG_BYTES];
 		ByteBuffer.wrap(binaryLong).putLong(l);
 		return binaryLong;
 	}
@@ -240,7 +256,7 @@ public final class BinaryConverter {
 	 * @return the binary representation of the specified double
 	 */
 	public static byte[] toBytes(double d) {
-		byte[] binaryDouble = new byte[Double.BYTES];
+		byte[] binaryDouble = new byte[BinaryConverter.DOUBLE_BYTES];
 		ByteBuffer.wrap(binaryDouble).putDouble(d);
 		return binaryDouble;
 	}
