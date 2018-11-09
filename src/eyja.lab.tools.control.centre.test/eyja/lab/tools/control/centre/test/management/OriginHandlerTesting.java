@@ -36,6 +36,7 @@ public class OriginHandlerTesting implements TestSubject {
 		OriginHandlerTesting.testAddingOrigins();
 		OriginHandlerTesting.testRemove();
 		OriginHandlerTesting.testDereference();
+		OriginHandlerTesting.testCheckedDereference();
 	}
 	
 	/**
@@ -238,6 +239,80 @@ public class OriginHandlerTesting implements TestSubject {
 			OriginHandler nullHandler = new OriginHandler();
 			try {
 				nullHandler.dereference(null);
+				throw new TestFailureException(String.format("The origin handler %s should fail "
+						+ "dereferencing %s.", nullHandler, null));
+			} catch (NullPointerException e) {
+				// Do nothing as this is expected behaviour.
+			}
+		}
+	}
+	
+	/**
+	 * Test dereferencing resource references with expected types.
+	 * 
+	 * @throws TestFailureException the test did fail
+	 */
+	private static void testCheckedDereference() throws TestFailureException {
+		for (int i = 0; i < 10000; i++) {
+			{
+				OriginHandler refHandler = new OriginHandler();
+				// add some random origins
+				int randomNumOrigin = TestRunnerWrapper.RANDOM.nextInt(300);
+				for (int j = 0; j < randomNumOrigin; j++) {
+					refHandler.requestAdd(OriginTesting.createRandomOrigin());
+				}
+				// create a random origin with a resource that can be referenced
+				Origin refOrigin = OriginTesting.createRandomOrigin();
+				Resource refResource = new TestResource();
+				refOrigin.requestAdd(refResource);
+				ResourceReference testRef = refResource.getReference();
+				refHandler.requestAdd(refOrigin);
+				// dereference the reference
+				Resource derefResource = refHandler.dereference(testRef, TestResource.class);
+				TestSubject.assertTestCondition(refResource == derefResource, String.format("The origin handler %s "
+						+ "should dereference the resource reference %s to resource %s, but instead "
+						+ "dereference it to %s.", 
+						refHandler, testRef, refResource, derefResource));
+				try {
+					Class<DifferentTestResource> failureType = DifferentTestResource.class;
+					Resource failureResource = refHandler.dereference(testRef, failureType);
+					throw new TestFailureException(String.format("The origin handler %s should fail "
+							+ "dereferencing %s since it should point to resource %s of type %s "
+							+ "while the type %s has been specified. However, dereferincing "
+							+ "returned resource %s of type %s.", refHandler, testRef, 
+							refResource, refResource.getClass(), failureType, failureResource, 
+							failureResource.getClass()));
+				} catch (ClassCastException e) {
+					// Do nothing as this is expected behaviour.
+				}
+			} { // test unmanaged origins
+				OriginHandler unmanagedHandler = new OriginHandler();
+				// add some random origins
+				int randomNumOrigin = TestRunnerWrapper.RANDOM.nextInt(300);
+				for (int j = 0; j < randomNumOrigin; j++) {
+					unmanagedHandler.requestAdd(OriginTesting.createRandomOrigin());
+				}
+				// create a random origin with a resource that can be referenced but do not add it to the handler
+				Origin unmanagedOrigin = OriginTesting.createRandomOrigin();
+				Resource unmanagedResource = new TestResource();
+				unmanagedOrigin.requestAdd(unmanagedResource);
+				ResourceReference unmanagedRef = unmanagedResource.getReference();
+				// dereference the reference
+				try {
+					Resource derefResource = unmanagedHandler.dereference(unmanagedRef, TestResource.class);
+					throw new TestFailureException(String.format("The origin handler %s should fail "
+							+ "dereferencing %s since it belongs to the unmanaged origin %s, but "
+							+ "dereferenced it to %s.", unmanagedHandler, unmanagedRef, unmanagedOrigin, 
+							derefResource));
+				} catch (IllegalArgumentException e) {
+					// Do nothing as this is expected behaviour.
+				}
+			}
+		}
+		{ // test dereferencing null
+			OriginHandler nullHandler = new OriginHandler();
+			try {
+				nullHandler.dereference(null, TestResource.class);
 				throw new TestFailureException(String.format("The origin handler %s should fail "
 						+ "dereferencing %s.", nullHandler, null));
 			} catch (NullPointerException e) {

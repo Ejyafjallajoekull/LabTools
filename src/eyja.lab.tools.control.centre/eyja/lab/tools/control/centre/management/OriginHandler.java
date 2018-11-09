@@ -69,6 +69,41 @@ public class OriginHandler {
 	}
 	
 	/**
+	 * Resolve the resource reference to a resource of the expected type. This method will 
+	 * fail if the referenced resource is from a different type.
+	 * 
+	 * @param <T> - the type of resource the reference is expected to point to
+	 * @param reference - the resource reference to resolve
+	 * @return the resource referenced or null if the resource is not contained in the origin 
+	 * specified by the reference
+	 * @throws NullPointerException if the specified resource reference is null
+	 * @throws IllegalArgumentException if the origin specified by the resource reference is not 
+	 * managed by this handler
+	 * @throws ClassCastException if the referenced resource is not of the expected type
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends Resource> T dereference(ResourceReference reference, Class<T> expectedType) {
+		if (reference != null) {
+			Origin refOrigin = this.originMap.get(reference.getOrigin());
+			if (refOrigin != null) {
+				Resource retrievedResource = refOrigin.retrieve(reference.getID());
+				if (retrievedResource.getClass().equals(expectedType)) {
+					return (T) retrievedResource;
+				} else {
+					throw new ClassCastException(String.format("The resource %s dereferenced from %s "
+							+ "is of type %s while %s was expected.", retrievedResource, reference, 
+							retrievedResource.getClass(), expectedType));
+				}
+			} else {
+				throw new IllegalArgumentException(String.format("The origin %s specified by resource "
+						+ "reference %s is not handled by %s.",  reference.getOrigin(), reference, this));
+			}
+		} else {
+			throw new NullPointerException("Null cannot be dereferenced.");
+		}
+	}
+	
+	/**
 	 * Remove the specified origin from this handler.
 	 * 
 	 * @param origin - the origin to remove
