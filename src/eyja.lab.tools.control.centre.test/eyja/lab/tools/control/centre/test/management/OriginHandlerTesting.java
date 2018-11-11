@@ -6,6 +6,7 @@ import java.util.Comparator;
 
 import eyja.lab.tools.control.centre.management.Origin;
 import eyja.lab.tools.control.centre.management.OriginHandler;
+import eyja.lab.tools.control.centre.management.ReferenceException;
 import eyja.lab.tools.control.centre.management.Resource;
 import eyja.lab.tools.control.centre.management.ResourceReference;
 import eyja.lab.tools.control.centre.test.TestRunnerWrapper;
@@ -268,11 +269,17 @@ public class OriginHandlerTesting implements TestSubject {
 				ResourceReference testRef = refResource.getReference();
 				refHandler.requestAdd(refOrigin);
 				// dereference the reference
-				Resource derefResource = refHandler.dereference(testRef, TestResource.class);
-				TestSubject.assertTestCondition(refResource == derefResource, String.format("The origin handler %s "
-						+ "should dereference the resource reference %s to resource %s, but instead "
-						+ "dereference it to %s.", 
-						refHandler, testRef, refResource, derefResource));
+				Resource derefResource;
+				try {
+					derefResource = refHandler.dereference(testRef, TestResource.class);
+					TestSubject.assertTestCondition(refResource == derefResource, String.format("The origin handler %s "
+							+ "should dereference the resource reference %s to resource %s, but instead "
+							+ "dereference it to %s.", 
+							refHandler, testRef, refResource, derefResource));
+				} catch (ReferenceException e1) {
+					e1.printStackTrace();
+					throw new TestFailureException(e1);
+				}	
 				try {
 					Class<DifferentTestResource> failureType = DifferentTestResource.class;
 					Resource failureResource = refHandler.dereference(testRef, failureType);
@@ -282,7 +289,7 @@ public class OriginHandlerTesting implements TestSubject {
 							+ "returned resource %s of type %s.", refHandler, testRef, 
 							refResource, refResource.getClass(), failureType, failureResource, 
 							failureResource.getClass()));
-				} catch (ClassCastException e) {
+				} catch (ReferenceException e) {
 					// Do nothing as this is expected behaviour.
 				}
 			} { // test unmanaged origins
@@ -306,6 +313,9 @@ public class OriginHandlerTesting implements TestSubject {
 							derefResource));
 				} catch (IllegalArgumentException e) {
 					// Do nothing as this is expected behaviour.
+				} catch (ReferenceException e1) {
+					e1.printStackTrace();
+					throw new TestFailureException(e1);
 				}
 			}
 		}
@@ -317,6 +327,9 @@ public class OriginHandlerTesting implements TestSubject {
 						+ "dereferencing %s.", nullHandler, null));
 			} catch (NullPointerException e) {
 				// Do nothing as this is expected behaviour.
+			} catch (ReferenceException e1) {
+				e1.printStackTrace();
+				throw new TestFailureException(e1);
 			}
 		}
 	}
