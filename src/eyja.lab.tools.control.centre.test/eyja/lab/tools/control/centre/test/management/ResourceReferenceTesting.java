@@ -8,7 +8,7 @@ import koro.sensei.tester.TestFailureException;
 import koro.sensei.tester.TestSubject;
 
 /**
- * The ResourceReferenceTesting class test the ResourceReference class for correct functionality.
+ * The ResourceReferenceTesting class tests the ResourceReference class for correct functionality.
  * 
  * @author Planters
  *
@@ -66,7 +66,7 @@ public class ResourceReferenceTesting implements TestSubject {
 				TestSubject.assertTestCondition(!firstRef.equals(secondRef), 
 						String.format("The resource reference %s should not equal %s.", firstRef, secondRef));
 				secondRef = new ResourceReference(TestRunnerWrapper.createRandomString() + 
-						TestRunnerWrapper.createRandomString(), testID);
+						firstRef.getOrigin() + "failure", testID);
 				TestSubject.assertTestCondition(!firstRef.equals(secondRef), 
 						String.format("The resource reference %s should not equal %s.", firstRef, secondRef));
 				// test null id

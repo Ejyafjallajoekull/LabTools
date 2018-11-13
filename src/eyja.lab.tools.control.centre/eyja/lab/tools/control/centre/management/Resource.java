@@ -18,6 +18,11 @@ public abstract class Resource {
 	public abstract byte[] serialise();
 	
 	/**
+	 * 
+	 */
+//	public abstract dereferenceSelf();
+	
+	/**
 	 * Get the resource's ID unique inside its origin.
 	 * 
 	 * @return the ID of this resource
