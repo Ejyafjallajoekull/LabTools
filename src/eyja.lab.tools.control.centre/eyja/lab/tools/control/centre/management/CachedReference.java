@@ -52,15 +52,13 @@ public class CachedReference extends ResourceReference {
 	 * already been cached
 	 * 
 	 * @return the referenced resource
+	 * 
 	 * @ throws NullPointerException if the resource is not cached yet and the origin handler 
 	 * for dereferencing is null
-	 * 
-	 * @throws ReferenceException if the type of the resource does not match the type of this
-	 * reference while caching
 	 * @throws IllegalArgumentException if the reference origin is not managed by the specified 
 	 * handler while caching
 	 */
-	public Resource getResource(OriginHandler fallbackHandler) throws ReferenceException {
+	public Resource getResource(OriginHandler fallbackHandler) {
 		if(!this.isCached()) {
 			this.cache(fallbackHandler);			
 		}
@@ -112,7 +110,7 @@ public class CachedReference extends ResourceReference {
 	 * @throws IllegalArgumentException if the reference origin is not managed by the specified 
 	 * handler
 	 */
-	public void cache(OriginHandler referenceHandler) throws ReferenceException {
+	public void cache(OriginHandler referenceHandler) {
 		if (referenceHandler != null) {
 			this.cachedResource = referenceHandler.dereference(this);
 			this.isCached = true;

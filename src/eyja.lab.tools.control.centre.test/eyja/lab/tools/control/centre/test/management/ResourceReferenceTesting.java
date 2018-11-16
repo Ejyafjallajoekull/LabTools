@@ -41,7 +41,7 @@ public class ResourceReferenceTesting implements TestSubject {
 				TestSubject.assertTestCondition(!firstRef.equals(secondRef), 
 						String.format("The resource reference %s should not equal %s.", firstRef, secondRef));
 				secondRef = new ResourceReference(TestRunnerWrapper.createRandomString() + 
-						TestRunnerWrapper.createRandomString(), testID);
+						firstRef.getOrigin() + "failure", testID);
 				TestSubject.assertTestCondition(!firstRef.equals(secondRef), 
 						String.format("The resource reference %s should not equal %s.", firstRef, secondRef));
 				// test null origin

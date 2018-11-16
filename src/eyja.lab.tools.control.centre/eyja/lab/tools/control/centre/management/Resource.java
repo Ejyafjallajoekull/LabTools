@@ -53,6 +53,20 @@ public abstract class Resource {
 	public ResourceReference getReference() {
 		return new ResourceReference(this.getID());
 	}
+	
+	/**
+	 * Create a specific, cached reference to this resource, which can be used to identify this resource 
+	 * even after serialisation and deserialisation. A reference can only be created if the resource is 
+	 * part of a valid origin.
+	 * 
+	 * @return a cached reference to this resource
+	 * 
+	 * @throws NullPointerException if the resource has not been assigned to any origin yet or the 
+	 * origin is invalid
+	 */
+	public CachedReference getCachedReference() {
+		return new CachedReference(this.getID());
+	}
 
 	@Override
 	public String toString() {
