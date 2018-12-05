@@ -6,6 +6,7 @@ import eyja.lab.tools.control.centre.management.OriginHandler;
 import eyja.lab.tools.control.centre.management.ReferenceException;
 import eyja.lab.tools.control.centre.management.Resource;
 import eyja.lab.tools.control.centre.management.ResourceID;
+import eyja.lab.tools.control.centre.management.ResourceReference;
 import eyja.lab.tools.control.centre.test.TestRunnerWrapper;
 import koro.sensei.tester.TestFailureException;
 import koro.sensei.tester.TestSubject;
@@ -24,6 +25,7 @@ public class CachedReferenceTesting implements TestSubject {
 		CachedReferenceTesting.testCaching();
 		CachedReferenceTesting.testGetCachedResource();
 		CachedReferenceTesting.testGetResource();
+		CachedReferenceTesting.testgenerateCachedReference();
 	}
 	
 	/**
@@ -460,6 +462,34 @@ public class CachedReferenceTesting implements TestSubject {
 				throw new TestFailureException(e);
 			}
 		}
+	}
+	
+	/**
+	 * Test generating cached references from standard references.
+	 * 
+	 * @throws TestFailureException the test did fail
+	 */
+	private static void testgenerateCachedReference() throws TestFailureException {
+		for (int i = 0; i < 10000; i++) {
+			OriginHandler testHandler = new OriginHandler();
+			Origin testOrigin = CachedReferenceTesting.createRandomOrigin();
+			testHandler.requestAdd(testOrigin);
+			TestResource testResource = new TestResource();
+			testOrigin.requestAdd(testResource);
+			CachedReference testCachedRef = testResource.getCachedReference();
+			ResourceReference refToTransform = testResource.getReference();
+			CachedReference generatedCachedRef = CachedReference.generateCachedReference(refToTransform);
+			// test caching and retrieval
+			TestSubject.assertTestCondition(generatedCachedRef.equals(testCachedRef), 
+					String.format("The cached reference %s generated from reference %s "
+							+ "should be equal to %s." ,
+							generatedCachedRef, refToTransform, testCachedRef));
+		}
+		// test null
+		CachedReference nullRef = CachedReference.generateCachedReference(null);
+		TestSubject.assertTestCondition(nullRef == null, String.format("Generating a cached "
+				+ "resource from null should return null, but returned %s instead.", 
+				null, null, nullRef));
 	}
 	
 	/**

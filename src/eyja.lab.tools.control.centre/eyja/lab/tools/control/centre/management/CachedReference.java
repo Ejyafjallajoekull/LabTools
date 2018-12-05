@@ -159,6 +159,26 @@ public class CachedReference extends ResourceReference {
 		}
 	}
 	
+	/**
+	 * Generates a cached version of the supplied resource reference. If the reference is already 
+	 * a cached on it will simply be returned again.
+	 * 
+	 * @param reference - the reference to create a cached version from
+	 * @return the cached version of the specified resource reference or null if the specified reference 
+	 * is null
+	 */
+	public static CachedReference generateCachedReference(ResourceReference reference) {
+		if (reference != null) {
+			if (reference instanceof CachedReference) {
+				return (CachedReference) reference;
+			} else {
+				return new CachedReference(reference.getOrigin(), reference.getID());
+			}
+		} else {
+			return null;
+		}
+	}
+	
 	@Override
 	public String toString() {
 		return String.format("[%s:%s:%s]", this.getOrigin(), this.getID(), this.isCached());
