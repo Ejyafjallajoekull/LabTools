@@ -266,11 +266,11 @@ public class Origin {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((deserialiser == null) ? 0 : deserialiser.hashCode());
-		result = prime * result + (int) (lastId ^ (lastId >>> 32));
-		result = prime * result + ((path == null) ? 0 : path.hashCode());
-		result = prime * result + ((resourceMap == null) ? 0 : resourceMap.hashCode());
-		result = prime * result + ((serialiser == null) ? 0 : serialiser.hashCode());
+		result = prime * result + ((this.deserialiser == null) ? 0 : this.deserialiser.hashCode());
+		result = prime * result + (int) (this.lastId ^ (this.lastId >>> 32));
+		result = prime * result + ((this.path == null) ? 0 : this.path.hashCode());
+		result = prime * result + ((this.resourceMap == null) ? 0 : this.resourceMap.hashCode());
+		result = prime * result + ((this.serialiser == null) ? 0 : this.serialiser.hashCode());
 		return result;
 	}
 
@@ -280,30 +280,30 @@ public class Origin {
 			return true;
 		if (obj == null)
 			return false;
-		if (!(obj instanceof Origin))
+		if (!(obj.getClass() == this.getClass()))
 			return false;
 		Origin other = (Origin) obj;
-		if (deserialiser == null) {
+		if (this.deserialiser == null) {
 			if (other.deserialiser != null)
 				return false;
-		} else if (!deserialiser.equals(other.deserialiser))
+		} else if (!this.deserialiser.equals(other.deserialiser))
 			return false;
-		if (lastId != other.lastId)
+		if (this.lastId != other.lastId)
 			return false;
-		if (path == null) {
+		if (this.path == null) {
 			if (other.path != null)
 				return false;
-		} else if (!path.equals(other.path))
+		} else if (!this.path.equals(other.path))
 			return false;
-		if (resourceMap == null) {
+		if (this.resourceMap == null) {
 			if (other.resourceMap != null)
 				return false;
-		} else if (!resourceMap.equals(other.resourceMap))
+		} else if (!this.resourceMap.equals(other.resourceMap))
 			return false;
-		if (serialiser == null) {
+		if (this.serialiser == null) {
 			if (other.serialiser != null)
 				return false;
-		} else if (!serialiser.equals(other.serialiser))
+		} else if (!this.serialiser.equals(other.serialiser))
 			return false;
 		return true;
 	}

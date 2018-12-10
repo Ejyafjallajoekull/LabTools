@@ -124,7 +124,7 @@ public class ResourceReference {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj != null && obj instanceof ResourceReference) {
+		if (obj != null && obj.getClass() == this.getClass()) {
 			ResourceReference comp = (ResourceReference) obj;
 			return this.id == comp.id && this.origin.equals(comp.origin);
 		}

@@ -80,19 +80,17 @@ public abstract class Resource {
 	
 	@Override
 	public int hashCode() {
-		ResourceID id = this.getID();
-		return 31 * 1 + ((id == null) ? 0 : id.hashCode());
+		return (this.id == null) ? 0 : this.id.hashCode();
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj != null && obj instanceof Resource) {
-			ResourceID ownID = this.getID();
-			ResourceID compID = ((Resource) obj).getID();
-			if (ownID == null && compID == null) {
+		if (obj != null && obj.getClass() == this.getClass()) {
+			Resource comp = ((Resource) obj);
+			if (this.id == null && comp.id == null) {
 				return true;
-			} else if (ownID != null) {
-				return ownID.equals(compID);
+			} else if (this.id != null) {
+				return this.id.equals(comp.id);
 			}
 		}
 		return false;

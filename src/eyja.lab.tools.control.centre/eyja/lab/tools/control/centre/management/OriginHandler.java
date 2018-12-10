@@ -127,12 +127,12 @@ public class OriginHandler {
 
 	@Override
 	public int hashCode() {
-		return 31 + originMap.hashCode();
+		return originMap.hashCode();
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj != null && obj instanceof OriginHandler) {
+		if (obj != null && obj.getClass() == this.getClass()) {
 			final OriginHandler comp = (OriginHandler) obj;
 			if (comp.originMap == null && this.originMap == null) {
 				return true;

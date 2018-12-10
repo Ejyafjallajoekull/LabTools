@@ -50,8 +50,8 @@ public class ResourceID {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (int) (id ^ (id >>> 32));
-		result = prime * result + ((origin == null) ? 0 : origin.hashCode());
+		result = prime * result + (int) (this.id ^ (this.id >>> 32));
+		result = prime * result + ((this.origin == null) ? 0 : this.origin.hashCode());
 		return result;
 	}
 
@@ -61,12 +61,12 @@ public class ResourceID {
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
+		if (this.getClass() != obj.getClass())
 			return false;
 		ResourceID other = (ResourceID) obj;
-		if (id != other.id)
+		if (this.id != other.id)
 			return false;
-		if (origin != other.origin) {
+		if (this.origin != other.origin) {
 			return false;
 		}
 		return true;
