@@ -14,5 +14,6 @@ module eyja.lab.tools.control.centre {
 	
 	requires java.base;
 	requires transitive central.logging;
+	requires transitive java.desktop;
 	
 }

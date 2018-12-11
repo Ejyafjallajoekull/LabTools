@@ -1,5 +1,7 @@
 package eyja.lab.tools.control.centre.operation;
 
+import javax.swing.JComponent;
+
 import eyja.lab.tools.control.centre.management.Project;
 
 /**
@@ -24,5 +26,13 @@ public interface Initialiser {
 	 * @return the initialiser descriptor.
 	 */
 	public InitialiserDescriptor getDescriptor();
+	
+	/**
+	 * Get the component representing the GUI of this initialiser. 
+	 * May be null if there is no GUI for this plugin.
+	 * 
+	 * @return the GUI component
+	 */
+	public JComponent getGUI();
 
 }
