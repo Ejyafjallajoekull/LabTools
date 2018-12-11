@@ -16,5 +16,13 @@ public interface Initialiser {
 	 * @param project - the project to initialise the module for
 	 */
 	public void initialise(Project project);
+	
+	/**
+	 * Get the plugin module descriptor of this initialiser, containing its name, version and a 
+	 * description of its function.
+	 * 
+	 * @return the initialiser descriptor.
+	 */
+	public InitialiserDescriptor getDescriptor();
 
 }
