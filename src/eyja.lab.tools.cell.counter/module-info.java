@@ -12,4 +12,6 @@ module eyja.lab.tools.cell.counter {
 	requires java.base;
 	requires transitive eyja.lab.tools.control.centre;
 	
+	provides eyja.lab.tools.control.centre.operation.Initialiser with eyja.lab.tools.cell.counter.core.CellCountInitialiser;
+	
 }
