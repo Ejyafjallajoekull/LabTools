@@ -10,6 +10,8 @@ module eyja.lab.tools.control.centre {
 	exports eyja.lab.tools.control.centre.binaryop;
 	exports eyja.lab.tools.control.centre.operation;
 	
+	uses eyja.lab.tools.control.centre.operation.Initialiser;
+	
 	requires java.base;
 	requires transitive central.logging;
 	
