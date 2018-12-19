@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.swing.JComponent;
+
 import eyja.lab.tools.cell.counter.functionality.CellCountResourceType;
 import eyja.lab.tools.cell.counter.functionality.Count;
 import eyja.lab.tools.cell.counter.functionality.CountedDilution;
@@ -17,11 +19,16 @@ import eyja.lab.tools.control.centre.management.Project;
 import eyja.lab.tools.control.centre.management.Resource;
 import eyja.lab.tools.control.centre.management.ResourceID;
 import eyja.lab.tools.control.centre.operation.Initialiser;
+import eyja.lab.tools.control.centre.operation.InitialiserDescriptor;
 
 public class CellCountInitialiser implements Initialiser, OriginDeserialiser {
 	
 	private static CellCountInitialiser mainInit = new CellCountInitialiser();
 	private static final File DEFAULT_ORIGIN_LOCATION = new File("CellCount" + Origin.ORIGIN_EXTENSION);	
+	private static final InitialiserDescriptor PLUGIN_DESCRIPTOR = new InitialiserDescriptor(
+			"Cell Counter", 
+			null, 
+			"1.0.0.1");
 	private static Origin countOrigin = null;
 	private static OriginHandler mainHandler = null;
 
@@ -49,13 +56,12 @@ public class CellCountInitialiser implements Initialiser, OriginDeserialiser {
 			CellCountInitialiser.countOrigin = new Origin(project.getProjectFolder().toPath().resolve(
 					CellCountInitialiser.DEFAULT_ORIGIN_LOCATION.toPath()).toFile(), 
 					CellCountInitialiser.mainInit);
-			CellCountInitialiser.mainHandler.requestAdd(CellCountInitialiser.countOrigin);
 		} else { // default initialisation
 			CellCountInitialiser.countOrigin = new Origin(CellCountInitialiser.DEFAULT_ORIGIN_LOCATION, 
 					CellCountInitialiser.mainInit);
 			CellCountInitialiser.mainHandler = new OriginHandler();
-			CellCountInitialiser.mainHandler.requestAdd(CellCountInitialiser.countOrigin);
 		}
+		CellCountInitialiser.mainHandler.requestAdd(CellCountInitialiser.countOrigin);
 	}
 
 	@Override
@@ -115,6 +121,17 @@ public class CellCountInitialiser implements Initialiser, OriginDeserialiser {
 			throw new NullPointerException(String.format("Cannot deserialise with input"
 					+ " %s and target origin %s.", originData, originToBuild));
 		}
+	}
+
+	@Override
+	public InitialiserDescriptor getDescriptor() {
+		return CellCountInitialiser.PLUGIN_DESCRIPTOR;
+	}
+
+	@Override
+	public JComponent getGUI() {
+		// TODO: graphical component
+		return null;
 	}
 
 }
