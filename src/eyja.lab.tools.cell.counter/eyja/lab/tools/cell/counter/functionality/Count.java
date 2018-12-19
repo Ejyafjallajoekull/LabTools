@@ -183,7 +183,7 @@ public class Count extends Resource {
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
+		int result = 1; // independent of ID / superclass
 		long temp;
 		temp = Double.doubleToLongBits(countingDensity);
 		result = prime * result + (int) (temp ^ (temp >>> 32));

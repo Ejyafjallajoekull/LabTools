@@ -3,6 +3,8 @@ package eyja.lab.tools.cell.counter.functionality;
 import eyja.lab.tools.cell.counter.core.CellCountInitialiser;
 import eyja.lab.tools.control.centre.binaryop.BinaryConverter;
 import eyja.lab.tools.control.centre.binaryop.BinaryOperator;
+import eyja.lab.tools.control.centre.management.CachedReference;
+import eyja.lab.tools.control.centre.management.ReferenceException;
 import eyja.lab.tools.control.centre.management.Resource;
 import eyja.lab.tools.control.centre.management.ResourceReference;
 
@@ -19,10 +21,8 @@ public class CountedDilution extends Resource {
 	 * The resource type.
 	 */
 	public static final CellCountResourceType type = CellCountResourceType.COUNTED_DILUTION;
-	private ResourceReference countRef = null;
-	private ResourceReference dilutionRef = null;
-	private Count count = null;
-	private Dilution dilution = null;
+	private CachedReference countRef = null;
+	private CachedReference dilutionRef = null;
 	
 	/**
 	 * Create a new combined cell count and dilution event. Either of both may be null.
@@ -31,8 +31,8 @@ public class CountedDilution extends Resource {
 	 * @param dilutionEvent - the dilution event after cell counting
 	 */
 	public CountedDilution (ResourceReference countingEvent, ResourceReference dilutionEvent) {
-		this.countRef = countingEvent;
-		this.dilutionRef = dilutionEvent;
+		this.countRef = CachedReference.generateCachedReference(countingEvent);
+		this.dilutionRef = CachedReference.generateCachedReference(dilutionEvent);
 	}
 	
 	/**
@@ -42,7 +42,7 @@ public class CountedDilution extends Resource {
 	 * @param countingEvent - the reference to the counting event
 	 */
 	public void setCountingEvent(ResourceReference countingEvent) {
-		this.countRef = countingEvent;
+		this.countRef = CachedReference.generateCachedReference(countingEvent);
 	}
 	
 	/**
@@ -52,20 +52,18 @@ public class CountedDilution extends Resource {
 	 * @param dilutionEvent - the reference to the dilution event
 	 */
 	public void setDilutionEvent(ResourceReference dilutionEvent) {
-		this.countRef = dilutionEvent;
+		this.countRef = CachedReference.generateCachedReference(dilutionEvent);
 	}
 	
 	/**
 	 * Get the cell count event that occurred before dilution. May be null.
 	 * 
 	 * @return the cell counting event
+	 * @throws ReferenceException if the internally kept resource reference could not be resolved
 	 */
-	public Count getCountingEvent() {
-		if (this.countRef != null) { // only retrieve the resource if the reference indicates one
-			if (this.count == null) { // cache the count
-				this.count = (Count) CellCountInitialiser.getMainHandler().dereference(this.countRef);
-			}
-			return this.count;
+	public Count getCountingEvent() throws ReferenceException {
+		if (this.countRef != null) {
+			return this.countRef.getResource(CellCountInitialiser.getMainHandler(), Count.class);
 		} else {
 			return null;
 		}
@@ -75,13 +73,11 @@ public class CountedDilution extends Resource {
 	 * Get the dilution event that occurred after cell counting. May be null.
 	 * 
 	 * @return the dilution event
+	 * @throws ReferenceException if the internally kept resource reference could not be resolved
 	 */
-	public Dilution getDilutionEvent() {
-		if (this.dilutionRef != null) { // only retrieve the resource if the reference indicates one
-			if (this.dilution == null) { // cache the count
-				this.dilution = (Dilution) CellCountInitialiser.getMainHandler().dereference(this.dilutionRef);
-			}
-			return this.dilution;
+	public Dilution getDilutionEvent() throws ReferenceException {
+		if (this.countRef != null) {
+			return this.dilutionRef.getResource(CellCountInitialiser.getMainHandler(), Dilution.class);
 		} else {
 			return null;
 		}
@@ -105,36 +101,43 @@ public class CountedDilution extends Resource {
 	}
 	
 	@Override
-	public String toString() {
-		return String.format("[%s:%s:%s]", this.getID(), this.getCountingEvent(), this.getDilutionEvent());
+	public String toString() {	
+		return String.format("[%s:%s:%s]", this.getID(), this.countRef, this.dilutionRef);
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((countRef == null) ? 0 : countRef.hashCode());
-		result = prime * result + ((dilutionRef == null) ? 0 : dilutionRef.hashCode());
+		int result = 1; // independent of ID / superclass
+		result = prime * result + ((this.countRef == null) ? 0 : this.countRef.hashCode());
+		result = prime * result + ((this.dilutionRef == null) ? 0 : this.dilutionRef.hashCode());
 		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (getClass() != obj.getClass())
+		// independent of ID / superclass
+		if (obj == null) {
 			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
 		CountedDilution other = (CountedDilution) obj;
-		if (countRef == null) {
-			if (other.countRef != null)
+		if (this.countRef == null) {
+			if (other.countRef != null) {
 				return false;
-		} else if (!countRef.equals(other.countRef))
+			}
+		} else if (!this.countRef.equals(other.countRef)) {
 			return false;
-		if (dilutionRef == null) {
-			if (other.dilutionRef != null)
+		}
+		if (this.dilutionRef == null) {
+			if (other.dilutionRef != null) {
 				return false;
-		} else if (!dilutionRef.equals(other.dilutionRef))
+			}
+		} else if (!this.dilutionRef.equals(other.dilutionRef)) {
 			return false;
+		}
 		return true;
 	}
 
