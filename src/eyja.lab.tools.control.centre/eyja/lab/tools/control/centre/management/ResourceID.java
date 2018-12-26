@@ -1,5 +1,7 @@
 package eyja.lab.tools.control.centre.management;
 
+import java.util.Objects;
+
 /**
  * The ResourceID class represents the ID consisting of its origin and its 
  * individual ID.
@@ -7,10 +9,10 @@ package eyja.lab.tools.control.centre.management;
  * @author Planters
  *
  */
-public class ResourceID {
+public final class ResourceID {
 
-	private Origin origin = null;
-	private long id = 0;
+	private final Origin origin;
+	private final long id;
 	
 	/**
 	 * Create a new resource ID compromised out of an origin and a origin unique ID.
@@ -57,19 +59,13 @@ public class ResourceID {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
-			return false;
-		if (this.getClass() != obj.getClass())
-			return false;
-		ResourceID other = (ResourceID) obj;
-		if (this.id != other.id)
-			return false;
-		if (this.origin != other.origin) {
-			return false;
+		} else if (obj instanceof ResourceID) {
+			ResourceID comp = (ResourceID) obj;
+			return Objects.equals(this.origin, comp.origin) && this.id == comp.id;
 		}
-		return true;
+		return false;
 	}
 
 	
