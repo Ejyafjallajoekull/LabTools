@@ -183,33 +183,5 @@ public class CachedReference extends ResourceReference {
 	public String toString() {
 		return String.format("[%s:%s:%s]", this.getOrigin(), this.getID(), this.isCached());
 	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((this.cachedResource == null) ? 0 : this.cachedResource.hashCode());
-		result = prime * result + (this.isCached ? 1231 : 1237);
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (this.getClass() != obj.getClass())
-			return false;
-		CachedReference other = (CachedReference) obj;
-		if (this.cachedResource == null) {
-			if (other.cachedResource != null)
-				return false;
-		} else if (!this.cachedResource.equals(other.cachedResource))
-			return false;
-		if (this.isCached != other.isCached)
-			return false;
-		return true;
-	}
 	
 }
