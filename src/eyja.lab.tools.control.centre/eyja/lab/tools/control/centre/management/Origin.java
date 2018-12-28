@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * The Origin class represents an enclosed resource environment with its own resource IDs 
@@ -14,17 +15,17 @@ import java.util.HashMap;
  * @author Planters
  *
  */
-public class Origin {
+public final class Origin {
 
 	/**
 	 * The default file extension for origins.
 	 */
 	public static final String ORIGIN_EXTENSION = ".ori";
 	
-	private File path = null;
-	private OriginDeserialiser deserialiser = null;
-	private OriginSerialiser serialiser = null;
-	private HashMap<Long, Resource> resourceMap = new HashMap<Long, Resource>();
+	private final File path;
+	private final OriginDeserialiser deserialiser;
+	private final OriginSerialiser serialiser;
+	private final HashMap<Long, Resource> resourceMap = new HashMap<Long, Resource>();
 	private long lastId = Long.MIN_VALUE;
 
 	/**
@@ -37,6 +38,7 @@ public class Origin {
 	public Origin(File file, OriginDeserialiser deserialiser) {
 		this.path = file;
 		this.deserialiser = deserialiser;
+		this.serialiser = null;
 	}
 	
 	/**
@@ -264,48 +266,27 @@ public class Origin {
 
 	@Override
 	public int hashCode() {
+		int result = Long.hashCode(this.lastId);
 		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((this.deserialiser == null) ? 0 : this.deserialiser.hashCode());
-		result = prime * result + (int) (this.lastId ^ (this.lastId >>> 32));
-		result = prime * result + ((this.path == null) ? 0 : this.path.hashCode());
-		result = prime * result + ((this.resourceMap == null) ? 0 : this.resourceMap.hashCode());
-		result = prime * result + ((this.serialiser == null) ? 0 : this.serialiser.hashCode());
+		result = prime * result + Objects.hashCode(this.path);
+		result = prime * result + Objects.hashCode(this.deserialiser);
+		result = prime * result + Objects.hashCode(this.serialiser);
 		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
-			return false;
-		if (!(obj.getClass() == this.getClass()))
-			return false;
-		Origin other = (Origin) obj;
-		if (this.deserialiser == null) {
-			if (other.deserialiser != null)
-				return false;
-		} else if (!this.deserialiser.equals(other.deserialiser))
-			return false;
-		if (this.lastId != other.lastId)
-			return false;
-		if (this.path == null) {
-			if (other.path != null)
-				return false;
-		} else if (!this.path.equals(other.path))
-			return false;
-		if (this.resourceMap == null) {
-			if (other.resourceMap != null)
-				return false;
-		} else if (!this.resourceMap.equals(other.resourceMap))
-			return false;
-		if (this.serialiser == null) {
-			if (other.serialiser != null)
-				return false;
-		} else if (!this.serialiser.equals(other.serialiser))
-			return false;
-		return true;
+		} else if (obj instanceof Origin) {
+			Origin comp = (Origin) obj;
+			return this.lastId == comp.lastId 
+					&& Objects.equals(this.path, comp.path) 
+					&& Objects.equals(this.deserialiser, comp.deserialiser) 
+					&& Objects.equals(this.serialiser, comp.serialiser)
+					&& Objects.equals(this.resourceMap, comp.resourceMap);
+		}
+		return false;
 	}
 	
 }
