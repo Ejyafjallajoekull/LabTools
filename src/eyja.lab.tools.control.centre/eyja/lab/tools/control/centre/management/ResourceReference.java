@@ -115,11 +115,7 @@ public class ResourceReference {
 
 	@Override
 	public final int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (int) (this.id ^ (this.id >>> 32));
-		result = prime * result + this.origin.hashCode();
-		return result;
+		return 31 * Long.hashCode(this.id) + this.origin.hashCode();
 	}
 
 	@Override
