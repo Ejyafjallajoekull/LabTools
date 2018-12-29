@@ -1,5 +1,7 @@
 package eyja.lab.tools.control.centre.operation;
 
+import java.util.Objects;
+
 /**
  * The InitialiserDesciptor class describes an initialiser and its plugin functionality.
  * 
@@ -60,10 +62,9 @@ public final class InitialiserDescriptor {
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((this.description == null) ? 0 : this.description.hashCode());
-		result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
-		result = prime * result + ((this.version == null) ? 0 : this.version.hashCode());
+		int result = Objects.hashCode(this.name);
+		result = prime * result + Objects.hashCode(this.description);
+		result = prime * result + Objects.hashCode(this.version);
 		return result;
 	}
 
@@ -71,36 +72,13 @@ public final class InitialiserDescriptor {
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
+		} else if (obj instanceof InitialiserDescriptor) {
+			InitialiserDescriptor comp = (InitialiserDescriptor) obj;
+			return Objects.equals(this.name, comp.name) 
+					&& Objects.equals(this.version, comp.version) 
+					&& Objects.equals(this.description, comp.description);
 		}
-		if (obj == null) {
-			return false;
-		}
-		if (this.getClass() != obj.getClass()) {
-			return false;
-		}
-		InitialiserDescriptor other = (InitialiserDescriptor) obj;
-		if (this.description == null) {
-			if (other.description != null) {
-				return false;
-			}
-		} else if (!this.description.equals(other.description)) {
-			return false;
-		}
-		if (this.name == null) {
-			if (other.name != null) {
-				return false;
-			}
-		} else if (!this.name.equals(other.name)) {
-			return false;
-		}
-		if (this.version == null) {
-			if (other.version != null) {
-				return false;
-			}
-		} else if (!this.version.equals(other.version)) {
-			return false;
-		}
-		return true;
+		return false;
 	}
 
 	@Override
