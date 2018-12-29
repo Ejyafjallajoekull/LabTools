@@ -8,7 +8,7 @@ package eyja.lab.tools.control.centre.management;
  */
 public abstract class Resource {
 
-	private ResourceID id = null;
+	protected ResourceID id = null;
 	
 	/**
 	 * Serialise the resource to an array of bytes.
@@ -76,24 +76,6 @@ public abstract class Resource {
 		} else {
 			return null;
 		}
-	}
-	
-	@Override
-	public int hashCode() {
-		return (this.id == null) ? 0 : this.id.hashCode();
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (obj != null && obj.getClass() == this.getClass()) {
-			Resource comp = ((Resource) obj);
-			if (this.id == null && comp.id == null) {
-				return true;
-			} else if (this.id != null) {
-				return this.id.equals(comp.id);
-			}
-		}
-		return false;
 	}
 	
 }

@@ -13,7 +13,7 @@ import eyja.lab.tools.control.centre.test.TestRunnerWrapper;
  * @author Planters
  *
  */
-public class TestResource extends Resource {
+public final class TestResource extends Resource {
 		
 	/**
 	 * Create a test resource only consisting of an ID.
@@ -37,14 +37,19 @@ public class TestResource extends Resource {
 	}
 	
 	@Override
+	public int hashCode() {
+		return (this.id == null) ? 0 : this.id.hashCode();
+	}
+	
+	@Override
 	public boolean equals(Object obj) {
-		// ignore origin
-		if (obj != null && obj instanceof TestResource) {
+		// ignore origin as this leads to a circular equals relation and a resulting infinity loop
+		if (obj instanceof TestResource) {
 			TestResource comp = (TestResource) obj;
-			if (this.getID() == null && comp.getID() == null) {
+			if (this.id == null && comp.id == null) {
 				return true;
-			} else if (this.getID() != null && comp.getID() != null) {
-				return this.getID().getID() == comp.getID().getID();
+			} else if (this.id != null && comp.id != null) {
+				return this.id.getID() == comp.id.getID();
 			}
 		}
 		return false;
