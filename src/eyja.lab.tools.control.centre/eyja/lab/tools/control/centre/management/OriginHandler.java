@@ -3,6 +3,7 @@ package eyja.lab.tools.control.centre.management;
 import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * The OriginHandler class allows easy access to all resources of registered origins and allows 
@@ -11,7 +12,7 @@ import java.util.HashMap;
  * @author Planters
  *
  */
-public class OriginHandler {
+public final class OriginHandler {
 
 	private HashMap<String, Origin> originMap = new HashMap<String, Origin>();
 	
@@ -132,13 +133,11 @@ public class OriginHandler {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj != null && obj.getClass() == this.getClass()) {
+		if (this == obj) {
+			return true;
+		} else if (obj instanceof OriginHandler) {
 			final OriginHandler comp = (OriginHandler) obj;
-			if (comp.originMap == null && this.originMap == null) {
-				return true;
-			} else if (this.originMap != null) {
-				return this.originMap.equals(comp.originMap);
-			}
+			return Objects.equals(this.originMap, comp.originMap);
 		}
 		return false;
 	}
