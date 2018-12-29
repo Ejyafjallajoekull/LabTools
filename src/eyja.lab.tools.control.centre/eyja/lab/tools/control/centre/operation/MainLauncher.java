@@ -8,10 +8,17 @@ import eyja.lab.tools.control.centre.management.Project;
  * @author Planters
  *
  */
-public class MainLauncher {
+public final class MainLauncher {
 	
 	private static Project currentProject = null;
 
+	/**
+	 * Constructor preventing instantiation.
+	 */
+	private MainLauncher() {
+		throw new AssertionError("This class cannot be instantiated.");
+	}
+	
 	public static void main(String[] args) {
 
 	}

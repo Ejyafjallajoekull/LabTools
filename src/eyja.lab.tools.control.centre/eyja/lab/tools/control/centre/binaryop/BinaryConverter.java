@@ -44,6 +44,13 @@ public final class BinaryConverter {
 	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 	
 	/**
+	 * Constructor preventing instantiation.
+	 */
+	private BinaryConverter() {
+		throw new AssertionError("This class cannot be instantiated.");
+	}
+	
+	/**
 	 * Convert the specified byte into a boolean.
 	 * 
 	 * @param binaryBoolean - the binary representation of a primitive boolean

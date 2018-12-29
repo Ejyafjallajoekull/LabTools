@@ -11,10 +11,17 @@ import central.logging.functionality.Logging;
  * @author Planters
  *
  */
-public class MainLogger {
+public final class MainLogger {
 
 	private static final Logging LOG = new Logging(new File("Logs"), "LabTools_Log");
 
+	/**
+	 * Constructor preventing instantiation.
+	 */
+	private MainLogger() {
+		throw new AssertionError("This class cannot be instantiated.");
+	}
+	
 	/**
 	 * Get the main logger responsible for LabTools.
 	 * 

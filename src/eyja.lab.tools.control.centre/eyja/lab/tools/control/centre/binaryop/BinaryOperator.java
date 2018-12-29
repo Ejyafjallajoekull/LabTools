@@ -6,7 +6,14 @@ package eyja.lab.tools.control.centre.binaryop;
  * @author Planters
  *
  */
-public class BinaryOperator {
+public final class BinaryOperator {
+	
+	/**
+	 * Constructor preventing instantiation.
+	 */
+	private BinaryOperator() {
+		throw new AssertionError("This class cannot be instantiated.");
+	}
 	
 	/**
 	 * Join the specified bytes into a single byte array. The processing order is sequential 
